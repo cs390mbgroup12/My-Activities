@@ -154,6 +154,9 @@ public class AccelerometerService extends SensorService implements SensorEventLi
     protected void registerSensors(){
 
         //TODO : (Assignment 0) Register the accelerometer sensor from the sensor manager.
+        mSensorManager = (SensorManager)getSystemService(SENSOR_SERVICE);
+        mAccelerometerSensor = mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
+        mSensorManager.registerListener(this, mAccelerometerSensor, SensorManager.SENSOR_DELAY_NORMAL);
 
         //TODO : (Assignment 1) Register your step detector. Register an OnStepListener to receive step events
     }
@@ -164,6 +167,8 @@ public class AccelerometerService extends SensorService implements SensorEventLi
     @Override
     protected void unregisterSensors() {
         //TODO : Unregister your sensors. Make sure mSensorManager is not null before calling its unregisterListener method.
+        if (mSensorManager != null)
+            mSensorManager.unregisterListener(this, mAccelerometerSensor);
     }
 
     @Override
@@ -216,8 +221,12 @@ public class AccelerometerService extends SensorService implements SensorEventLi
             long timestamp_in_milliseconds = (long) ((double) event.timestamp / Constants.TIMESTAMPS.NANOSECONDS_PER_MILLISECOND);
 
             //TODO: Send the accelerometer reading to the server
+            AccelerometerReading accelReading = new AccelerometerReading(mUserID, "MOBILE", "", timestamp_in_milliseconds, event.values[0], event.values[1], event.values[2]);
+
+            mClient.sendSensorReading(accelReading);
 
             //TODO: broadcast the accelerometer reading to the UI
+            broadcastAccelerometerReading(timestamp_in_milliseconds, event.values);
 
         }else if (event.sensor.getType() == Sensor.TYPE_STEP_DETECTOR) {
 
