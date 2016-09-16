@@ -221,7 +221,7 @@ public class AccelerometerService extends SensorService implements SensorEventLi
             long timestamp_in_milliseconds = (long) ((double) event.timestamp / Constants.TIMESTAMPS.NANOSECONDS_PER_MILLISECOND);
 
             //TODO: Send the accelerometer reading to the server
-            AccelerometerReading accelReading = new AccelerometerReading(mUserID, "MOBILE", "", timestamp_in_milliseconds, event.values[0], event.values[1], event.values[2]);
+            AccelerometerReading accelReading = new AccelerometerReading(mUserID, "MOBILE", "", System.currentTimeMillis(), event.values[0], event.values[1], event.values[2]);
 
             mClient.sendSensorReading(accelReading);
 
