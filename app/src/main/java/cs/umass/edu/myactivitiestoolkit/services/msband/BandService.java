@@ -172,7 +172,6 @@ public class BandService extends SensorService implements BandGyroscopeEventList
 
     @Override
     public void onBandGyroscopeChanged(BandGyroscopeEvent event) {
-        //TODO: Remove code from starter code
         Object[] data = new Object[]{event.getTimestamp(),
                 event.getAccelerationX(), event.getAccelerationY(), event.getAccelerationZ(),
                 event.getAngularVelocityX(), event.getAngularVelocityY(), event.getAngularVelocityZ()};
@@ -186,11 +185,6 @@ public class BandService extends SensorService implements BandGyroscopeEventList
         Log.d(TAG, sample);
     }
 
-    //TODO: Remove method from starter code
-    /**
-     * Broadcasts the accelerometer reading to other application components, e.g. the main UI.
-     * @param accelerometerReadings the x, y, and z accelerometer readings
-     */
     public void broadcastAccelerometerReading(final long timestamp, final float... accelerometerReadings) {
         Intent intent = new Intent();
         intent.putExtra(Constants.KEY.TIMESTAMP, timestamp);
