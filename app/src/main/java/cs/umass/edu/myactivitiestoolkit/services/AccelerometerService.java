@@ -17,6 +17,7 @@ import java.util.Locale;
 
 import cs.umass.edu.myactivitiestoolkit.R;
 import cs.umass.edu.myactivitiestoolkit.constants.Constants;
+import cs.umass.edu.myactivitiestoolkit.processing.Filter;
 import cs.umass.edu.myactivitiestoolkit.steps.StepDetector;
 import edu.umass.cs.MHLClient.client.MessageReceiver;
 import edu.umass.cs.MHLClient.client.MobileIOClient;
@@ -171,6 +172,7 @@ public class AccelerometerService extends SensorService implements SensorEventLi
         //TODO : Unregister your sensors. Make sure mSensorManager is not null before calling its unregisterListener method.
         if (mSensorManager != null)
             mSensorManager.unregisterListener(this, mAccelerometerSensor);
+            mSensorManager.unregisterListener(this, mStepSensor);
     }
 
     @Override
@@ -214,7 +216,7 @@ public class AccelerometerService extends SensorService implements SensorEventLi
      * @see SensorEvent
      * @see #broadcastAccelerometerReading(long, float[])
      */
-
+    Filter x = new Filter(4);
     @Override
     public void onSensorChanged(SensorEvent event) {
         if (event.sensor.getType() == Sensor.TYPE_ACCELEROMETER) {
