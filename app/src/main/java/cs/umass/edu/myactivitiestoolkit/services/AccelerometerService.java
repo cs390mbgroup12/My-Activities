@@ -18,6 +18,7 @@ import java.util.Locale;
 import cs.umass.edu.myactivitiestoolkit.R;
 import cs.umass.edu.myactivitiestoolkit.constants.Constants;
 import cs.umass.edu.myactivitiestoolkit.processing.Filter;
+import cs.umass.edu.myactivitiestoolkit.steps.OnStepListener;
 import cs.umass.edu.myactivitiestoolkit.steps.StepDetector;
 import edu.umass.cs.MHLClient.client.MessageReceiver;
 import edu.umass.cs.MHLClient.client.MobileIOClient;
@@ -106,6 +107,21 @@ public class AccelerometerService extends SensorService implements SensorEventLi
         mStepDetector = new StepDetector();
     }
 
+    public class myStepListener implements OnStepListener{
+        public void onStepCountUpdated(int stepCount){
+            mAndroidStepCount = stepCount ;
+        }
+        public void onStepDetected(long timestamp, float[] values){
+            Intent intent = new Intent();
+            intent.putExtra(Constants.KEY.TIMESTAMP, timestamp);
+            intent.putExtra(Constants.KEY.ACCELEROMETER_DATA, values);
+            intent.setAction(Constants.ACTION.BROADCAST_ACCELEROMETER_DATA);
+            LocalBroadcastManager manager = LocalBroadcastManager.getInstance(AccelerometerService.this);
+            manager.sendBroadcast(intent);
+        }
+
+    }
+
     @Override
     protected void onServiceStarted() {
         broadcastMessage(Constants.MESSAGE.ACCELEROMETER_SERVICE_STARTED);
@@ -162,6 +178,8 @@ public class AccelerometerService extends SensorService implements SensorEventLi
         //TODO : (Assignment 1) Register your step detector. Register an OnStepListener to receive step events
         mStepSensor = mSensorManager.getDefaultSensor(Sensor.TYPE_STEP_DETECTOR);
         mSensorManager.registerListener(this, mStepSensor, SensorManager.SENSOR_DELAY_NORMAL);
+        OnStepListener sListen = new myStepListener();
+        mStepDetector.registerOnStepListener(sListen);
     }
 
     /**
@@ -170,10 +188,13 @@ public class AccelerometerService extends SensorService implements SensorEventLi
     @Override
     protected void unregisterSensors() {
         //TODO : Unregister your sensors. Make sure mSensorManager is not null before calling its unregisterListener method.
-        if (mSensorManager != null)
+        if (mSensorManager != null) {
             mSensorManager.unregisterListener(this, mAccelerometerSensor);
             mSensorManager.unregisterListener(this, mStepSensor);
+            mStepDetector.unregisterOnStepListeners();
+        }
     }
+
 
     @Override
     protected int getNotificationID() {
@@ -216,25 +237,29 @@ public class AccelerometerService extends SensorService implements SensorEventLi
      * @see SensorEvent
      * @see #broadcastAccelerometerReading(long, float[])
      */
-    Filter x = new Filter(4);
+    Filter phil = new Filter(0.25);
     @Override
     public void onSensorChanged(SensorEvent event) {
         if (event.sensor.getType() == Sensor.TYPE_ACCELEROMETER) {
-
+            double[] philvalues = phil.getFilteredValues(event.values[0],event.values[1],event.values[2]);
             // convert the timestamp to milliseconds (note this is not in Unix time)
             long timestamp_in_milliseconds = (long) ((double) event.timestamp / Constants.TIMESTAMPS.NANOSECONDS_PER_MILLISECOND);
 
             //TODO: Send the accelerometer reading to the server
-            AccelerometerReading accelReading = new AccelerometerReading(mUserID, "MOBILE", "", System.currentTimeMillis(), event.values[0], event.values[1], event.values[2]);
+            //AccelerometerReading accelReading = new AccelerometerReading(mUserID, "MOBILE", "", System.currentTimeMillis(), event.values[0], event.values[1], event.values[2]);
+            AccelerometerReading accelReading = new AccelerometerReading(mUserID, "MOBILE", "", System.currentTimeMillis(), (float)philvalues[0],(float)philvalues[1], (float)philvalues[2]);
 
             mClient.sendSensorReading(accelReading);
+            //OnStepListener.onStepDetected(long timestamp, float[] values)
 
             //TODO: broadcast the accelerometer reading to the UI
             broadcastAccelerometerReading(timestamp_in_milliseconds, event.values);
+            broadcastStepDetected(timestamp_in_milliseconds, event.values);
 
         }else if (event.sensor.getType() == Sensor.TYPE_STEP_DETECTOR) {
 
             // we received a step event detected by the built-in Android step detector (assignment 1)
+            broadcastLocalStepCount(mAndroidStepCount);
             broadcastAndroidStepCount(mAndroidStepCount++);
 
         } else {
