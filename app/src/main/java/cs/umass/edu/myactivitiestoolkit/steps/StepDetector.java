@@ -6,6 +6,8 @@ import android.hardware.SensorEventListener;
 import android.util.Log;
 
 import java.util.ArrayList;
+import java.util.List;
+import java.lang.Math.*;
 
 import cs.umass.edu.myactivitiestoolkit.processing.Filter;
 
@@ -55,6 +57,56 @@ public class StepDetector implements SensorEventListener {
         mStepListeners.clear();
     }
 
+    private class Point{
+        private float x;
+        private float y;
+        private float z;
+        public Point(float x, float y, float z){
+            this.x = x;
+            this.y = y;
+            this.z = z;
+        }
+        public float getX(){
+            return this.x;
+        }
+        public float getY(){
+            return this.y;
+        }
+        public float getZ(){
+            return this.z;
+        }
+    }
+
+    // own defined variables and methods
+//    private List<Point> buffer = new ArrayList<Point>();
+    private List<Float> xBuffer = new ArrayList<Float>();
+    private List<Float> yBuffer = new ArrayList<Float>();
+    private List<Float> zBuffer = new ArrayList<Float>();
+    long windowStartTime;
+    final long windowLength = 2;
+    final float marginError = 1;
+
+    private float findMax (List<Float> arr){
+        float max = arr.get(0);
+        for(int i = 1; i < arr.size(); i++){
+            if(arr.get(i) > max){
+                max = arr.get(i);
+            }
+        }
+        return max;
+    }
+
+    private float findMin (List<Float> arr){
+        float min = arr.get(0);
+        for(int i = 1; i < arr.size(); i++){
+            if(arr.get(i) < min){
+                min = arr.get(i);
+            }
+        }
+        return min;
+    }
+
+    /////////////////////////////////////
     /**
      * Here is where you will receive accelerometer readings, buffer them if necessary
      * and run your step detection algorithm. When a step is detected, call
@@ -67,9 +119,37 @@ public class StepDetector implements SensorEventListener {
     @Override
     public void onSensorChanged(SensorEvent event) {
         if (event.sensor.getType() == Sensor.TYPE_ACCELEROMETER) {
+            long timestamp = event.timestamp;
 
-            //TODO: Detect steps! Call onStepDetected(...) when a step is detected.
+            if(xBuffer.isEmpty()){
+                windowStartTime = timestamp;
+            }
 
+            xBuffer.add(event.values[0]);
+            yBuffer.add(event.values[1]);
+            zBuffer.add(event.values[2]);
+
+            if(timestamp - windowStartTime > windowLength){
+                //TODO: analyze the data within buffer
+                // Find max and min for each buffer and compute their ranges
+                float xRange = findMax(xBuffer) - findMin(xBuffer);
+                float yRange = findMax(yBuffer) - findMin(yBuffer);
+                float zRange = findMax(zBuffer) - findMin(zBuffer);
+                float maxRange = Math.max(Math.max(xRange, yRange), zRange);
+                List<Float> buffer = new ArrayList<Float>();
+                if (maxRange == xRange)
+                    buffer = xBuffer;
+                else
+                    if (maxRange == yRange)
+                        buffer = yBuffer;
+                    else
+                        buffer = zBuffer;
+
+                float max = findMax(buffer);
+                float min = findMin(buffer);
+                float average = (max + min)/2;
+
+            }
         }
     }
 
