@@ -106,6 +106,18 @@ public class StepDetector implements SensorEventListener {
         return min;
     }
 
+    private int findAverage(List<Float> arr){
+        float avg = (findMin(arr)+findMax(arr))/2;
+        int avgCount = 0;
+        for (int i =1; i< arr.size(); i++){
+            if(arr.get(i)+.25 > avg)
+                avgCount ++;
+            if(arr.get(i)-.25 <avg)
+                avgCount ++;
+        }
+        return avgCount;
+    }
+
     /////////////////////////////////////
     /**
      * Here is where you will receive accelerometer readings, buffer them if necessary
@@ -148,6 +160,14 @@ public class StepDetector implements SensorEventListener {
                 float max = findMax(buffer);
                 float min = findMin(buffer);
                 float average = (max + min)/2;
+
+//                if(findAverage(buffer) <3 && findAverage(buffer)>1){
+//                    stepCount++;
+//                    onStepDetected(windowLength,);//??????????);
+//                }
+
+
+
 
             }
         }
