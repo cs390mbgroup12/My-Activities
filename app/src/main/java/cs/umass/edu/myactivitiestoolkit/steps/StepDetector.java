@@ -58,61 +58,53 @@ public class StepDetector implements SensorEventListener {
     }
 
     private class Point{
-        private float x;
-        private float y;
-        private float z;
-        public Point(float x, float y, float z){
-            this.x = x;
-            this.y = y;
-            this.z = z;
+        private float point;
+        private long timestamp;
+
+        public Point(float point, long timestamp){
+            this.point = point;
+            this.timestamp = timestamp;
         }
-        public float getX(){
-            return this.x;
-        }
-        public float getY(){
-            return this.y;
-        }
-        public float getZ(){
-            return this.z;
-        }
+        public float getPoint() { return this.point; }
+        public long getTime() { return this.timestamp; }
     }
 
     // own defined variables and methods
 //    private List<Point> buffer = new ArrayList<Point>();
-    private List<Float> xBuffer = new ArrayList<Float>();
-    private List<Float> yBuffer = new ArrayList<Float>();
-    private List<Float> zBuffer = new ArrayList<Float>();
+    private List<Point> xBuffer = new ArrayList<Point>();
+    private List<Point> yBuffer = new ArrayList<Point>();
+    private List<Point> zBuffer = new ArrayList<Point>();
     long windowStartTime;
     final long windowLength = 2;
-    final float marginError = 1;
+    float marginError = 0;
 
-    private float findMax (List<Float> arr){
-        float max = arr.get(0);
+    private float findMax (List<Point> arr){
+        float max = arr.get(0).getPoint();
         for(int i = 1; i < arr.size(); i++){
-            if(arr.get(i) > max){
-                max = arr.get(i);
+            if(arr.get(i).getPoint() > max){
+                max = arr.get(i).getPoint();
             }
         }
         return max;
     }
 
-    private float findMin (List<Float> arr){
-        float min = arr.get(0);
+    private float findMin (List<Point> arr){
+        float min = arr.get(0).getPoint();
         for(int i = 1; i < arr.size(); i++){
-            if(arr.get(i) < min){
-                min = arr.get(i);
+            if(arr.get(i).getPoint() < min){
+                min = arr.get(i).getPoint();
             }
         }
         return min;
     }
 
-    private int findAverage(List<Float> arr){
+    private int findAverage(List<Point> arr){
         float avg = (findMin(arr)+findMax(arr))/2;
         int avgCount = 0;
         for (int i =1; i< arr.size(); i++){
-            if(arr.get(i)+.25 > avg)
+            if(arr.get(i).getPoint()+.25 > avg)
                 avgCount ++;
-            if(arr.get(i)-.25 <avg)
+            if(arr.get(i).getPoint()-.25 <avg)
                 avgCount ++;
         }
         return avgCount;
@@ -137,9 +129,9 @@ public class StepDetector implements SensorEventListener {
                 windowStartTime = timestamp;
             }
 
-            xBuffer.add(event.values[0]);
-            yBuffer.add(event.values[1]);
-            zBuffer.add(event.values[2]);
+            xBuffer.add(new Point(event.values[0], timestamp));
+            yBuffer.add(new Point(event.values[1], timestamp));
+            zBuffer.add(new Point(event.values[2], timestamp));
 
             if(timestamp - windowStartTime > windowLength){
                 //TODO: analyze the data within buffer
@@ -148,7 +140,7 @@ public class StepDetector implements SensorEventListener {
                 float yRange = findMax(yBuffer) - findMin(yBuffer);
                 float zRange = findMax(zBuffer) - findMin(zBuffer);
                 float maxRange = Math.max(Math.max(xRange, yRange), zRange);
-                List<Float> buffer = new ArrayList<Float>();
+                List<Point> buffer = new ArrayList<Point>();
                 if (maxRange == xRange)
                     buffer = xBuffer;
                 else
@@ -159,7 +151,41 @@ public class StepDetector implements SensorEventListener {
 
                 float max = findMax(buffer);
                 float min = findMin(buffer);
+
+                marginError = (0.0500f)*(max - min);
                 float average = (max + min)/2;
+                float upperBound = average + marginError;
+                float lowerBound = average - marginError;
+
+                //Buffer is in order of timestamps
+                boolean isHigher = (buffer.get(0).getPoint() > upperBound);
+                long lastTimestamp = buffer.get(0).getTime();
+//                int remainingThresholds = 3;
+//                if (isHigher)
+//                    remainingThresholds = 2;
+
+                for (int i = 1; i < buffer.size(); i++) {
+                    if (isHigher) {
+                        if (buffer.get(i).getPoint() <= lowerBound && Math.abs(lastTimestamp - buffer.get(i).getTime()) > 0.3) {
+                            isHigher = false;
+                            float[] points = new float[3];
+                            points[0] = xBuffer.get(i).getPoint();
+                            points[1] = yBuffer.get(i).getPoint();
+                            points[2] = zBuffer.get(i).getPoint();
+                            onStepDetected(buffer.get(i).getTime(), points);
+                            lastTimestamp = buffer.get(i).getTime();
+                        }
+                    }
+                    else {
+                        if (buffer.get(i).getPoint() > upperBound)
+                            isHigher = true;
+                    }
+                }
+
+                //Empty buffers for next time interval
+                xBuffer = new ArrayList<Point>();
+                yBuffer = new ArrayList<Point>();
+                zBuffer = new ArrayList<Point>();
 
 //                if(findAverage(buffer) <3 && findAverage(buffer)>1){
 //                    stepCount++;

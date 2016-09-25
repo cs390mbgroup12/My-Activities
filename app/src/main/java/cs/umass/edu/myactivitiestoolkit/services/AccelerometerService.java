@@ -237,7 +237,7 @@ public class AccelerometerService extends SensorService implements SensorEventLi
      * @see SensorEvent
      * @see #broadcastAccelerometerReading(long, float[])
      */
-    Filter phil = new Filter(0.25);
+    Filter phil = new Filter(4);
     @Override
     public void onSensorChanged(SensorEvent event) {
         if (event.sensor.getType() == Sensor.TYPE_ACCELEROMETER) {
@@ -250,11 +250,14 @@ public class AccelerometerService extends SensorService implements SensorEventLi
             AccelerometerReading accelReading = new AccelerometerReading(mUserID, "MOBILE", "", System.currentTimeMillis(), (float)philvalues[0],(float)philvalues[1], (float)philvalues[2]);
 
             mClient.sendSensorReading(accelReading);
-            //OnStepListener.onStepDetected(long timestamp, float[] values)
 
+            float[] philFloats = new float[3];
+            philFloats[0] = (float)philvalues[0];
+            philFloats[1] = (float)philvalues[1];
+            philFloats[2] = (float)philvalues[2];
             //TODO: broadcast the accelerometer reading to the UI
-            broadcastAccelerometerReading(timestamp_in_milliseconds, event.values);
-            broadcastStepDetected(timestamp_in_milliseconds, event.values);
+            broadcastAccelerometerReading(timestamp_in_milliseconds, philFloats);
+            broadcastStepDetected(timestamp_in_milliseconds, philFloats);
 
         }else if (event.sensor.getType() == Sensor.TYPE_STEP_DETECTOR) {
 
