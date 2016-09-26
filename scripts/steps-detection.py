@@ -24,6 +24,12 @@ import numpy as np
 user_id = "b9.49.29.1f.91.78.ea.3d.e9.35"
 
 count = 0
+xBuffer = []
+yBuffer = []
+zBuffer = []
+windowStartTime = 0
+windowLength = 2000
+marginError = 0
 
 '''
     This socket is used to send data back through the data collection server.
@@ -51,9 +57,77 @@ def detectSteps(timestamp, filteredValues):
     When a step has been detected, call the onStepDetected method, passing
     in the timestamp.
     """
-    
     # TODO: Step detection algorithm
-    return
+    global xBuffer
+    global yBuffer
+    global zBuffer
+    global windowStartTime
+    global windowLength
+    global marginError
+
+    if not xBuffer:
+        windowStartTime = timestamp
+    
+    xBuffer.append((filteredValues[0],timestamp))
+    yBuffer.append((filteredValues[1],timestamp))
+    zBuffer.append((filteredValues[2],timestamp))
+
+    if abs(timestamp - windowStartTime) > windowLength:
+        xRange=findMax(xBuffer) - findMin(xBuffer)
+        yRange=findMax(yBuffer) - findMin(yBuffer)
+        zRange=findMax(zBuffer) - findMin(zBuffer)
+        maxRange = max(xRange,yRange,zRange)
+        if maxRange == xRange:
+            buff = xBuffer
+        elif maxRange == yRange:
+            buff = yBuffer
+        else:
+            buff = zBuffer
+            
+        maxB = findMax(buff)
+        minB = findMin(buff)
+        
+        marginError = 0.05*(maxB-minB)
+        average = (maxB+minB)/2
+        upperBound = (average + marginError)
+        lowerBound = (average - marginError)
+        isHigher = (buff[0][0] >= upperBound)
+        lastTimestamp = buff[0][1]
+        temp = buff[1:]
+        for elem in temp:
+            if isHigher:
+                if elem[0] < lowerBound and abs(lastTimestamp - elem[1]) > 0.3:
+                    print (maxB-minB)                    
+                    if (maxB - minB) >= 0.50:                  
+                        isHigher = False
+                        print "step"
+                        onStepDetected(elem[1])
+                        lastTimestamp = elem[1]
+                    
+            else:
+                if elem[0] > upperBound:
+                    isHigher = True
+                    
+                    
+        xBuffer = []    
+        yBuffer = []    
+        zBuffer = []   
+        
+        
+def findMax(arr):
+    curMax = arr[0][0]
+    for (point,time) in arr:
+        if point > curMax:
+            curMax = point
+    return curMax
+    
+def findMin(arr):
+    curMin = arr[0][0]
+    for (point,time) in arr:
+        if point < curMin:
+            curMin = point
+    return curMin
+    
 
 
 

@@ -123,6 +123,7 @@ public class StepDetector implements SensorEventListener {
     @Override
     public void onSensorChanged(SensorEvent event) {
         if (event.sensor.getType() == Sensor.TYPE_ACCELEROMETER) {
+            this.onStepDetected(event.timestamp, event.values);
             long timestamp = event.timestamp;
 
             if(xBuffer.isEmpty()){
