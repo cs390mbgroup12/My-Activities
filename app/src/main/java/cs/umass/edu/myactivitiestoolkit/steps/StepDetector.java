@@ -71,9 +71,9 @@ public class StepDetector implements SensorEventListener {
 
     // own defined variables and methods
 //    private List<Point> buffer = new ArrayList<Point>();
-    private List<Point> xBuffer = new ArrayList<Point>();
-    private List<Point> yBuffer = new ArrayList<Point>();
-    private List<Point> zBuffer = new ArrayList<Point>();
+    private List<Point> xBuffer = new ArrayList<Point>(500);
+    private List<Point> yBuffer = new ArrayList<Point>(500);
+    private List<Point> zBuffer = new ArrayList<Point>(500);
     long windowStartTime;
     final long windowLength = 2;
     float marginError = 0;
@@ -122,20 +122,26 @@ public class StepDetector implements SensorEventListener {
      */
     @Override
     public void onSensorChanged(SensorEvent event) {
+       // Log.d(TAG, "The sensor type is: " + event.values[0]);
+       // Log.d(TAG, "The sensor type is: " + event.values[1]);
+       // Log.d(TAG, "The sensor type is: " + event.values[2]);
         if (event.sensor.getType() == Sensor.TYPE_ACCELEROMETER) {
-            this.onStepDetected(event.timestamp, event.values);
-            long timestamp = event.timestamp;
+//            this.onStepDetected(event.timestamp, event.values);
+         //   Log.d(TAG, "In accelerometer type if statement");
+//            long timestamp = event.timestamp;
 
             if(xBuffer.isEmpty()){
-                windowStartTime = timestamp;
+                windowStartTime = event.timestamp;
             }
 
-            xBuffer.add(new Point(event.values[0], timestamp));
-            yBuffer.add(new Point(event.values[1], timestamp));
-            zBuffer.add(new Point(event.values[2], timestamp));
+           // Log.d(TAG, "xBuffer: " + xBuffer);
+            xBuffer.add(new Point(event.values[0], event.timestamp));
+            yBuffer.add(new Point(event.values[1], event.timestamp));
+            zBuffer.add(new Point(event.values[2], event.timestamp));
 
-            if(timestamp - windowStartTime > windowLength){
+            if(event.timestamp - windowStartTime > windowLength){
                 //TODO: analyze the data within buffer
+//                Log.d(TAG, "in loop to process steps");
                 // Find max and min for each buffer and compute their ranges
                 float xRange = findMax(xBuffer) - findMin(xBuffer);
                 float yRange = findMax(yBuffer) - findMin(yBuffer);
@@ -164,17 +170,20 @@ public class StepDetector implements SensorEventListener {
 //                int remainingThresholds = 3;
 //                if (isHigher)
 //                    remainingThresholds = 2;
-
                 for (int i = 1; i < buffer.size(); i++) {
                     if (isHigher) {
                         if (buffer.get(i).getPoint() <= lowerBound && Math.abs(lastTimestamp - buffer.get(i).getTime()) > 0.3) {
-                            isHigher = false;
-                            float[] points = new float[3];
-                            points[0] = xBuffer.get(i).getPoint();
-                            points[1] = yBuffer.get(i).getPoint();
-                            points[2] = zBuffer.get(i).getPoint();
-                            onStepDetected(buffer.get(i).getTime(), points);
-                            lastTimestamp = buffer.get(i).getTime();
+                            if ((max - min) > 3.6) {
+//                                Log.d(TAG, "found a step");
+                                isHigher = false;
+                                float[] points = new float[3];
+                                points[0] = xBuffer.get(i).getPoint();
+                                points[1] = yBuffer.get(i).getPoint();
+                                points[2] = zBuffer.get(i).getPoint();
+                                Log.d(TAG, "Found step at time: " + buffer.get(i).getTime() + "   Current time: " + event.timestamp);
+                                onStepDetected(buffer.get(i).getTime(), points);
+                                lastTimestamp = buffer.get(i).getTime();
+                            }
                         }
                     }
                     else {
@@ -184,9 +193,9 @@ public class StepDetector implements SensorEventListener {
                 }
 
                 //Empty buffers for next time interval
-                xBuffer = new ArrayList<Point>();
-                yBuffer = new ArrayList<Point>();
-                zBuffer = new ArrayList<Point>();
+                xBuffer = new ArrayList<Point>(500);
+                yBuffer = new ArrayList<Point>(500);
+                zBuffer = new ArrayList<Point>(500);
 
 //                if(findAverage(buffer) <3 && findAverage(buffer)>1){
 //                    stepCount++;

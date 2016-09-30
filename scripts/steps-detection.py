@@ -98,7 +98,7 @@ def detectSteps(timestamp, filteredValues):
             if isHigher:
                 if elem[0] < lowerBound and abs(lastTimestamp - elem[1]) > 0.3:
                     print (maxB-minB)                    
-                    if (maxB - minB) >= 0.50:                  
+                    if (maxB - minB) > 3.60:                  
                         isHigher = False
                         print "step"
                         onStepDetected(elem[1])

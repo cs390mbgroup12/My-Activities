@@ -11,6 +11,7 @@ import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.v4.content.LocalBroadcastManager;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -212,7 +213,8 @@ public class ExerciseFragment extends Fragment {
                         mPeakTimestamps.add(timestamp);
                         mPeakValues.add(values[2]); //place on z-axis signal
                     }
-                } else if (intent.getAction().equals("SENSOR_STEP")) {
+                } else if (intent.getAction().equals("edu.umass.cs.my-activities-toolkit.action.broadcast-server-step-count")) {
+                    Log.d(TAG, "in SENSOR_STEP");
                     int stepCount = intent.getIntExtra(Constants.KEY.STEP_COUNT, 0);
                     displayServerStepCount(stepCount);
                 }
@@ -331,7 +333,7 @@ public class ExerciseFragment extends Fragment {
         filter.addAction(Constants.ACTION.BROADCAST_MESSAGE);
         filter.addAction(Constants.ACTION.BROADCAST_ACCELEROMETER_DATA);
         filter.addAction(Constants.ACTION.BROADCAST_ACCELEROMETER_PEAK);
-        filter.addAction("SENSOR_STEP");
+        filter.addAction("edu.umass.cs.my-activities-toolkit.action.broadcast-server-step-count");
         filter.addAction(Constants.ACTION.BROADCAST_ANDROID_STEP_COUNT);
         filter.addAction(Constants.ACTION.BROADCAST_LOCAL_STEP_COUNT);
         broadcastManager.registerReceiver(receiver, filter);

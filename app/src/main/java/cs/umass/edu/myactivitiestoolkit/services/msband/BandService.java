@@ -125,6 +125,7 @@ public class BandService extends SensorService implements BandGyroscopeEventList
     @Override
     protected void registerSensors() {
         new SensorSubscriptionTask().execute();
+
     }
 
     /**
@@ -181,6 +182,8 @@ public class BandService extends SensorService implements BandGyroscopeEventList
                 event.getAccelerationX(), event.getAccelerationY(), event.getAccelerationZ());
         mClient.sendSensorReading(new GyroscopeReading(mUserID, "", "", event.getTimestamp(),
                 event.getAngularVelocityX(), event.getAngularVelocityY(), event.getAngularVelocityZ()));
+
+
         String sample = TextUtils.join(",", data);
         Log.d(TAG, sample);
     }
