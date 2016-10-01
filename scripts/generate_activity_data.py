@@ -93,11 +93,7 @@ C = 1.0
 
 clf = svm.SVC(kernel = 'linear', C=C )
 
-<<<<<<< HEAD
 cv = cross_validation.KFold(n, n_folds=10, shuffle=True, random_state=None)
-=======
-cv = cross_validation.KFold(n, n_folds=10, shuffle=False, random_state=None)
->>>>>>> 9c858b64e9f6959c39eb2845256fa3f2e2482d21
 
 for i, (train_indexes, test_indexes) in enumerate(cv):
     X_train = X[train_indexes, :]
@@ -117,7 +113,6 @@ for i, (train_indexes, test_indexes) in enumerate(cv):
     
     # TODO: Compute the accuracy, precision and recall from the confusion matrix
     
-<<<<<<< HEAD
     #pre = tp/(tp+fp)
     #recall = tp/(tp+fn)
     #acc = (tp+tn)/(p+n)
@@ -160,13 +155,6 @@ for i, (train_indexes, test_indexes) in enumerate(cv):
     print("\n")
 
 # TODO: Then change the CV parameter shuffle to True and describe how the results change.
-=======
-    print("\n")
-
-# TODO: Output the average accuracy, precision and recall over the 10 folds 
-
-# TOO: Then change the CV parameter shuffle to True and describe how the results change.
->>>>>>> 9c858b64e9f6959c39eb2845256fa3f2e2482d21
 
 
 # Train on entire dataset; that will give us the decision boundary we'll plot.
