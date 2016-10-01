@@ -3,6 +3,7 @@ package cs.umass.edu.myactivitiestoolkit.services.msband;
 import android.app.Notification;
 import android.app.Service;
 import android.content.Intent;
+import android.hardware.SensorManager;
 import android.os.AsyncTask;
 import android.support.v4.content.LocalBroadcastManager;
 import android.text.TextUtils;
@@ -22,6 +23,8 @@ import com.microsoft.band.sensors.SampleRate;
 import cs.umass.edu.myactivitiestoolkit.R;
 import cs.umass.edu.myactivitiestoolkit.constants.Constants;
 import cs.umass.edu.myactivitiestoolkit.services.SensorService;
+import cs.umass.edu.myactivitiestoolkit.steps.OnStepListener;
+import cs.umass.edu.myactivitiestoolkit.steps.StepDetector;
 import edu.umass.cs.MHLClient.sensors.AccelerometerReading;
 import edu.umass.cs.MHLClient.sensors.GyroscopeReading;
 
@@ -57,6 +60,18 @@ public class BandService extends SensorService implements BandGyroscopeEventList
         broadcastMessage(Constants.MESSAGE.BAND_SERVICE_STOPPED);
     }
 
+    private int localStepCount = 0;
+    public class myStepListener implements OnStepListener{
+        public void onStepCountUpdated(int stepCount){
+            localStepCount = stepCount ;
+            Log.d(TAG, "Testing: localstepcount is " + localStepCount);
+            broadcastLocalStepCount(localStepCount);
+        }
+        public void onStepDetected(long timestamp, float[] values){
+            broadcastStepDetected(timestamp, values);
+        }
+    }
+
     /**
      * Asynchronous task for connecting to the Microsoft Band accelerometer and gyroscope sensors.
      * Errors may arise if the Band does not support the Band SDK version or the Microsoft Health
@@ -74,6 +89,16 @@ public class BandService extends SensorService implements BandGyroscopeEventList
                 if (getConnectedBandClient()) {
                     broadcastStatus(getString(R.string.status_connected));
                     bandClient.getSensorManager().registerGyroscopeEventListener(BandService.this, SampleRate.MS16);
+                    //////////////////////////////////////////////////
+                    BandStepDetector mStepDetector = new BandStepDetector();
+                    bandClient.getSensorManager().registerAccelerometerEventListener(mStepDetector, SampleRate.MS16);
+                    myStepListener mStepListener = new myStepListener();
+                    mStepDetector.registerOnStepListener(mStepListener);
+
+
+//                    mSensorManager.registerListener(mStepDetector, mAccelerometerSensor, SensorManager.SENSOR_DELAY_NORMAL);
+//                    OnStepListener sListen = new myStepListener();
+//                    mStepDetector.registerOnStepListener(sListen);
                 } else {
                     broadcastStatus(getString(R.string.status_not_connected));
                 }
@@ -193,6 +218,28 @@ public class BandService extends SensorService implements BandGyroscopeEventList
         intent.putExtra(Constants.KEY.TIMESTAMP, timestamp);
         intent.putExtra(Constants.KEY.ACCELEROMETER_DATA, accelerometerReadings);
         intent.setAction(Constants.ACTION.BROADCAST_ACCELEROMETER_DATA);
+        LocalBroadcastManager manager = LocalBroadcastManager.getInstance(this);
+        manager.sendBroadcast(intent);
+    }
+
+    /////////////////////////////////////////////////////////////////////////////////////
+    /**
+     * Broadcasts the step count computed by your step detection algorithm
+     * to other application components, e.g. the main UI.
+     */
+    public void broadcastLocalStepCount(int stepCount) {
+        Intent intent = new Intent();
+        intent.putExtra(Constants.KEY.STEP_COUNT, stepCount);
+        intent.setAction(Constants.ACTION.BROADCAST_LOCAL_STEP_COUNT);
+        LocalBroadcastManager manager = LocalBroadcastManager.getInstance(this);
+        manager.sendBroadcast(intent);
+    }
+
+    public void broadcastStepDetected(long timestamp, float[] values) {
+        Intent intent = new Intent();
+        intent.putExtra(Constants.KEY.ACCELEROMETER_PEAK_TIMESTAMP, timestamp);
+        intent.putExtra(Constants.KEY.ACCELEROMETER_PEAK_VALUE, values);
+        intent.setAction(Constants.ACTION.BROADCAST_ACCELEROMETER_PEAK);
         LocalBroadcastManager manager = LocalBroadcastManager.getInstance(this);
         manager.sendBroadcast(intent);
     }
