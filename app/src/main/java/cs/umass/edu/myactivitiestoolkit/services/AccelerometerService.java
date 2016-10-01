@@ -112,7 +112,7 @@ public class AccelerometerService extends SensorService implements SensorEventLi
     public class myStepListener implements OnStepListener{
         public void onStepCountUpdated(int stepCount){
             localStepCount = stepCount ;
-            Log.d(TAG, "Testing: localstepcount is " + localStepCount);
+//            Log.d(TAG, "Testing: localstepcount is " + localStepCount);
             broadcastLocalStepCount(localStepCount);
         }
         public void onStepDetected(long timestamp, float[] values){
@@ -259,7 +259,7 @@ public class AccelerometerService extends SensorService implements SensorEventLi
 
             //TODO: Send the accelerometer reading to the server
             //AccelerometerReading accelReading = new AccelerometerReading(mUserID, "MOBILE", "", System.currentTimeMillis(), event.values[0], event.values[1], event.values[2]);
-            AccelerometerReading accelReading = new AccelerometerReading(mUserID, "MOBILE", "", System.currentTimeMillis(), (float)filtValues[0],(float)filtValues[1], (float)filtValues[2]);
+            AccelerometerReading accelReading = new AccelerometerReading(mUserID, "MOBILE", "", (timestamp_in_milliseconds), (float)filtValues[0],(float)filtValues[1], (float)filtValues[2]);
 
             mClient.sendSensorReading(accelReading);
 
@@ -268,7 +268,8 @@ public class AccelerometerService extends SensorService implements SensorEventLi
             filtFloats[1] = (float)filtValues[1];
             filtFloats[2] = (float)filtValues[2];
             //TODO: broadcast the accelerometer reading to the UI
-            broadcastAccelerometerReading(System.currentTimeMillis(), filtFloats);
+//            Log.d(TAG, " vs " + timestamp_in_milliseconds);
+            broadcastAccelerometerReading((timestamp_in_milliseconds), filtFloats);
 //            broadcastStepDetected(timestamp_in_milliseconds, philFloats);
 
         }else if (event.sensor.getType() == Sensor.TYPE_STEP_DETECTOR) {

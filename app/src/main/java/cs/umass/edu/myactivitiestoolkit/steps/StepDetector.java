@@ -125,21 +125,22 @@ public class StepDetector implements SensorEventListener {
        // Log.d(TAG, "The sensor type is: " + event.values[0]);
        // Log.d(TAG, "The sensor type is: " + event.values[1]);
        // Log.d(TAG, "The sensor type is: " + event.values[2]);
+//        Log.d(TAG, "in stepdetect vs " + event.timestamp / 1000000);
         if (event.sensor.getType() == Sensor.TYPE_ACCELEROMETER) {
 //            this.onStepDetected(event.timestamp, event.values);
-         //   Log.d(TAG, "In accelerometer type if statement");
-//            long timestamp = event.timestamp;
+            //Log.d(TAG, "The passed in timestamp is: " + event.timestamp);
+            long timestamp = event.timestamp / 1000000;
 
             if(xBuffer.isEmpty()){
-                windowStartTime = event.timestamp;
+                windowStartTime = timestamp;
             }
 
            // Log.d(TAG, "xBuffer: " + xBuffer);
-            xBuffer.add(new Point(event.values[0], event.timestamp));
-            yBuffer.add(new Point(event.values[1], event.timestamp));
-            zBuffer.add(new Point(event.values[2], event.timestamp));
+            xBuffer.add(new Point(event.values[0], timestamp));
+            yBuffer.add(new Point(event.values[1], timestamp));
+            zBuffer.add(new Point(event.values[2], timestamp));
 
-            if(event.timestamp - windowStartTime > windowLength){
+            if(timestamp - windowStartTime > windowLength){
                 //TODO: analyze the data within buffer
 //                Log.d(TAG, "in loop to process steps");
                 // Find max and min for each buffer and compute their ranges
@@ -180,7 +181,7 @@ public class StepDetector implements SensorEventListener {
                                 points[0] = xBuffer.get(i).getPoint();
                                 points[1] = yBuffer.get(i).getPoint();
                                 points[2] = zBuffer.get(i).getPoint();
-                                Log.d(TAG, "Found step at time: " + buffer.get(i).getTime() + "   Current time: " + event.timestamp);
+                                //Log.d(TAG, "Found step at time: " + buffer.get(i).getTime() + "   Current time: " + event.timestamp);
                                 onStepDetected(buffer.get(i).getTime(), points);
                                 lastTimestamp = buffer.get(i).getTime();
                             }
