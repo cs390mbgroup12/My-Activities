@@ -155,15 +155,15 @@ public class BandStepDetector implements BandAccelerometerEventListener {
                 float lowerBound = average - marginError;
 
                 //Buffer is in order of timestamps
-                boolean isHigher = (buffer.get(0).getPoint() > upperBound);
-                long lastTimestamp = buffer.get(0).getTime();
+                boolean isHigher = (xBuffer.get(0).getPoint() > upperBound);
+                long lastTimestamp = xBuffer.get(0).getTime();
 //                int remainingThresholds = 3;
 //                if (isHigher)
 //                    remainingThresholds = 2;
-                for (int i = 1; i < buffer.size(); i++) {
+                for (int i = 1; i < xBuffer.size(); i++) {
                     if (isHigher) {
-                        if (buffer.get(i).getPoint() <= lowerBound && Math.abs(lastTimestamp - buffer.get(i).getTime()) > 0.3) {
-                            if ((max - min) > 3.6) {
+                        if (xBuffer.get(i).getPoint() <= lowerBound && Math.abs(lastTimestamp - xBuffer.get(i).getTime()) > 0.3) {
+                            if ((max - min) > .2) {
 //                                Log.d(TAG, "found a step");
                                 isHigher = false;
                                 float[] points = new float[3];
@@ -171,13 +171,13 @@ public class BandStepDetector implements BandAccelerometerEventListener {
                                 points[1] = yBuffer.get(i).getPoint();
                                 points[2] = zBuffer.get(i).getPoint();
                                 Log.d(TAG, "Found step at time: " + buffer.get(i).getTime() + "   Current time: " + currentTime);
-                                onStepDetected(buffer.get(i).getTime(), points);
-                                lastTimestamp = buffer.get(i).getTime();
+                                onStepDetected(xBuffer.get(i).getTime(), points);
+                                lastTimestamp =xBuffer.get(i).getTime();
                             }
                         }
                     }
                     else {
-                        if (buffer.get(i).getPoint() > upperBound)
+                        if (xBuffer.get(i).getPoint() > upperBound)
                             isHigher = true;
                     }
                 }
