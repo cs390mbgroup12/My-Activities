@@ -90,6 +90,9 @@ n = len(y)
 # gives the best performance metrics on a validation dataset, a separate 
 # dataset in addition to training/test. You don't need to do this.
 C = 1.0  
+totalPrec =[0,0,0]
+totalRecall = [0,0,0]
+totalAcc = 0
 
 clf = svm.SVC(kernel = 'linear', C=C )
 
@@ -137,10 +140,12 @@ for i, (train_indexes, test_indexes) in enumerate(cv):
             prec.append(0)
         else:
             prec.append(conf[x][x]/sumCol[x])
+            totalPrec[x] += conf[x][x]/sumCol[x]
         if np.isnan(conf[x][x]/sumRow[x]):
             recall.append(0)
         else:
             recall.append(conf[x][x]/sumRow[x])
+            totalRecall[x] +=conf[x][x]/sumRow[x]
         
     acc = totalDiag / total
 
@@ -153,6 +158,12 @@ for i, (train_indexes, test_indexes) in enumerate(cv):
     print "Precision: ",prec
     print "Recall: ",recall
     print("\n")
+    totalAcc += acc
+
+
+print "Avg Accuracy: ", totalAcc/10
+print "Avg Precision: ", [x / 10 for x in totalPrec]
+print "Avg Recall: ", [x / 10 for x in totalRecall]
 
 # TODO: Then change the CV parameter shuffle to True and describe how the results change.
 
