@@ -15,12 +15,31 @@ it is still publicly accessible).
 """
 
 import numpy as np
+import matplotlib.pyplot as plt
 
 def _compute_mean_features(window):
     """
     Computes the mean x, y and z acceleration over the given window. 
     """
-    return np.mean(window, axis=0)
+    mean = np.mean(window, axis=0)
+    print mean
+    return mean
+    
+def _compute_var_features(window):
+    """
+    Computes the mean x, y and z acceleration over the given window. 
+    """
+    var = np.var(window, axis=0)
+    print var
+    return var
+
+def _compute_median_features(window):
+    """
+    Computes the mean x, y and z acceleration over the given window. 
+    """
+    median = np.median(window, axis=0)
+    print median
+    return median
 
 def extract_features(window):
     """
@@ -34,7 +53,23 @@ def extract_features(window):
     """
     
     x = []
+    mean = _compute_mean_features(window)
+    median = _compute_var_features(window)
+    var = _compute_median_features(window)
     
-    x = np.append(x, _compute_mean_features(window))   
+    '''
+    x = np.append(x, _compute_mean_features(window), axis=0)  
+    x = np.append(x, _compute_var_features(window), axis=0) 
+    x = np.append(x, _compute_median_features(window), axis=0) 
+    '''
+    x = np.array([mean, median, var]); 
+    
+    print window
+    print x
+    
+    plt.figure(1) # always call plt.figure() unless you want to plot points on an existing plot
+    plt.plot(mean, median, 'ro')
+    plt.show()
+
     
     return x
