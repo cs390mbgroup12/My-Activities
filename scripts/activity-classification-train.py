@@ -80,7 +80,7 @@ n_samples = 1000
 time_elapsed_seconds = (data[n_samples,0] - data[0,0]) / 1000
 sampling_rate = n_samples / time_elapsed_seconds
 
-feature_names = ["mean X", "mean Y", "mean Z", "var X"]
+feature_names = ["std_magnitude", "medianX", "medianY", "medianZ", "meanX", "meanY", "meanZ", "stdX", "stdY", "stdZ", "mean_magnitude", "meancrossX", "meancrossY", "meancrossZ"]
 class_names = ["Stationary", "Walking"]
 
 print("Extracting features and labels for window size {} and step size {}...".format(window_size, step_size))
@@ -119,7 +119,12 @@ sys.stdout.flush()
 plt.figure()
 formats = ['bo', 'go']
 for i in range(0,len(y),10): # only plot 1/10th of the points, it's a lot of data!
+    # Graph 1: std_magnitude vs medianZ
     plt.plot(X[i,0], X[i,3], formats[int(y[i])])
+    # Graph 2: meanX vs stdX
+    # plt.plot(X[i,4], X[i,7], formats[int(y[i])])
+    # Graph 3: mean_magnitude vs meanCrossingZ
+    # plt.plot(X[i,10], X[i,13], formats[int(y[i])])
 
 plt.show()
 
@@ -140,13 +145,15 @@ clf = svm.SVC(kernel = 'linear', C=C )
 # Report average accuracy, precision and recall metrics.
 cv = cross_validation.KFold(n, n_folds=10, shuffle=True, random_state=None)
 
+tree = DecisionTreeClassifier(criterion ="entropy",max_depth=3)
+
 for i, (train_indexes, test_indexes) in enumerate(cv):
     X_train = X[train_indexes, :]
     y_train = y[train_indexes]
     X_test = X[test_indexes, :]
     y_test = y[test_indexes]
-    clf.fit(X_train, y_train)
-    y_pred = clf.predict(X_test)
+    tree.fit(X_train, y_train)
+    y_pred = tree.predict(X_test)
     conf = confusion_matrix(y_test,y_pred)
     print("Fold {}".format(i))
     print conf
@@ -190,9 +197,8 @@ for i, (train_indexes, test_indexes) in enumerate(cv):
 print "Avg Accuracy: ", totalAcc/10
 print "Avg Precision: ", [x / 10 for x in totalPrec]
 print "Avg Recall: ", [x / 10 for x in totalRecall]
-clf.fit(X, y)
+tree.fit(X, y)
 
-tree = DecisionTreeClassifier(criterion ="entropy",max_depth=3)
 export_graphviz(tree, out_file='tree.dot', feature_names = feature_names)
 # TODO: Evaluate another classifier, i.e. SVM, Logistic Regression, k-NN, etc.
 # TODO: Once you have collected data, train your best model on the entire

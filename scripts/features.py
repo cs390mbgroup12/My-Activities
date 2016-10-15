@@ -68,7 +68,7 @@ def  _compute_std_magnitude_features(window):
     sqry = np.sqrt(summy)
     return np.std(sqry,axis=0)
 
-def _computer_zero_crossings_features(window):
+def _computer_mean_crossings_features(window):
     x=0
     y=0
     z=0
@@ -104,16 +104,17 @@ def extract_features(window):
     """
    # print window
     x = []
+
     #GRAPH 1 STD_MAGNITUDE VS MEDIAN Z
     x = np.append(x,  _compute_std_magnitude_features(window))
     x = np.append(x, _compute_median_features(window))
 
     #GRAPH 2 MEAN X VS STD X
-    # x = np.append(x,  _compute_mean_features(window))
-    # x = np.append(x, _compute_std_features(window))
+    x = np.append(x,  _compute_mean_features(window))
+    x = np.append(x, _compute_std_features(window))
 
-    # #GRAPH 3 MEAN_MAGNITUDE VS ZERO_CROSSINGS Z
-    # x = np.append(x,  _compute_mean_magnitude_features(window))
-    # x = np.append(x, _computer_zero_crossings_features(window))
+    # #GRAPH 3 MEAN_MAGNITUDE VS MEAN_CROSSINGS Z
+    x = np.append(x,  _compute_mean_magnitude_features(window))
+    x = np.append(x, _computer_mean_crossings_features(window))
 
     return x
