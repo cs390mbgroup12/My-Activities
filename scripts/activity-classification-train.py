@@ -136,11 +136,11 @@ plt.show()
 
 n = len(y)
 n_classes = len(class_names)
-C = 1.0
+
 totalPrec =[0,0,0]
 totalRecall = [0,0,0]
 totalAcc = 0
-clf = svm.SVC(kernel = 'linear', C=C )
+
 # TODO: Train and evaluate your decision tree classifier over 10-fold CV.
 # Report average accuracy, precision and recall metrics.
 cv = cross_validation.KFold(n, n_folds=10, shuffle=True, random_state=None)
@@ -200,12 +200,72 @@ print "Avg Recall: ", [x / 10 for x in totalRecall]
 tree.fit(X, y)
 
 export_graphviz(tree, out_file='tree.dot', feature_names = feature_names)
+
+########################################################################
 # TODO: Evaluate another classifier, i.e. SVM, Logistic Regression, k-NN, etc.
 # TODO: Once you have collected data, train your best model on the entire
 # dataset. Then save it to disk as follows:
+print "LinearSVC"    
+
+totalPrec =[0,0,0]
+totalRecall = [0,0,0]
+totalAcc = 0
+
+liney = svm.LinearSVC()
+for i, (train_indexes, test_indexes) in enumerate(cv):
+    X_train = X[train_indexes, :]
+    y_train = y[train_indexes]
+    X_test = X[test_indexes, :]
+    y_test = y[test_indexes]
+    liney.fit(X_train, y_train)
+    y_pred = liney.predict(X_test)
+    conf = confusion_matrix(y_test,y_pred)
+    print("Fold {}".format(i))
+    print conf
+    totalDiag=0.0
+    total = 0.0
+    sumCol = []
+    prec = []
+    sumRow = []
+    recall = []
+
+    for x in range(conf.shape[0]):
+        totalDiag += conf[x][x]
+        total += sum(conf[x])
+        sumCol.append((float)(sum(conf[:,x])))
+        sumRow.append((float)(sum(conf[x,:])))
+        if np.isnan(conf[x][x]/sumCol[x]):
+            prec.append(0)
+        else:
+            prec.append(conf[x][x]/sumCol[x])
+            totalPrec[x] += conf[x][x]/sumCol[x]
+        if np.isnan(conf[x][x]/sumRow[x]):
+            recall.append(0)
+        else:
+            recall.append(conf[x][x]/sumRow[x])
+            totalRecall[x] +=conf[x][x]/sumRow[x]
+
+    acc = totalDiag / total
+
+    print("\n")
+
+    print "Accuracy: ",acc
+    print "Precision: ",prec
+    print "Recall: ",recall
+    print("\n")
+    totalAcc += acc
+
+
+print "Avg Accuracy: ", totalAcc/10
+print "Avg Precision: ", [x / 10 for x in totalPrec]
+print "Avg Recall: ", [x / 10 for x in totalRecall]
+liney.fit(X, y)
+################################################
+
+
 
 # when ready, set this to the best model you found, trained on all the data:
-best_classifier = None
+best_classifier = tree
 
 with open('classifier.pickle', 'wb') as f: # 'wb' stands for 'write bytes'
     pickle.dump(best_classifier, f)
