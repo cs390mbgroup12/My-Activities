@@ -18,6 +18,8 @@ import android.view.ViewGroup;
 import android.widget.CompoundButton;
 import android.widget.Switch;
 import android.widget.TextView;
+import android.widget.EditText;
+import android.widget.Button;
 
 import com.androidplot.util.PixelUtils;
 import com.androidplot.xy.BoundaryMode;
@@ -122,6 +124,8 @@ public class ExerciseFragment extends Fragment {
      * {@link #GRAPH_CAPACITY} before the plot is fully populated. **/
     private int mNumberOfPoints = 0;
 
+    EditText labbie;
+    Button labbieButton;
     /**
      * The queue of timestamps.
      */
@@ -226,6 +230,7 @@ public class ExerciseFragment extends Fragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         this.mServiceManager = ServiceManager.getInstance(getActivity());
+
     }
 
     @Override
@@ -240,7 +245,15 @@ public class ExerciseFragment extends Fragment {
         txtAndroidStepCount = (TextView) view.findViewById(R.id.txtAndroidStepCount);
         txtLocalStepCount = (TextView) view.findViewById(R.id.txtLocalStepCount);
         txtServerStepCount = (TextView) view.findViewById(R.id.txtServerStepCount);
+        labbie = (EditText) view.findViewById(R.id.labelTextField);
+        labbieButton = (Button) view.findViewById (R.id.labelButton);
+        labbieButton.setOnClickListener(new View.OnClickListener() {
 
+            @Override
+            public void onClick(View view) {
+
+            }
+        });
         //obtain reference to the activity text field
         txtActivity = (TextView) view.findViewById(R.id.txtActivity);
 
@@ -435,4 +448,5 @@ public class ExerciseFragment extends Fragment {
         mPlot.addSeries(peaks, mPeakSeriesFormatter);
         mPlot.redraw();
     }
+
 }

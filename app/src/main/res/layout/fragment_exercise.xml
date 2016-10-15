@@ -56,16 +56,11 @@
             android:layout_weight="1"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
-            android:id="@+id/layout_step_count">
-
-            <ImageView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:src="@drawable/ic_step_black"
-                tools:ignore="ContentDescription" />
+            android:id="@+id/layout_step_count"
+            android:weightSum="1">
 
             <LinearLayout
-                android:layout_width="match_parent"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:orientation="vertical" >
 
@@ -106,17 +101,30 @@
                     android:layout_height="wrap_content" />
             </LinearLayout>
 
+            <TextView
+                android:id="@+id/txtActivity"
+                android:drawableStart="@drawable/ic_running_black_48dp"
+                android:text="@string/activity_initial"
+                android:textSize="20sp"
+                android:textColor="@android:color/holo_blue_dark"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:layout_weight="0.45" />
+
+            <Button
+                style="?android:attr/buttonStyleSmall"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Go"
+                android:id="@+id/labelButton"
+                android:layout_alignBaseline="@+id/labelTextField"
+                android:layout_alignBottom="@+id/labelTextField"
+                android:layout_alignParentRight="true"
+                android:layout_alignParentEnd="true"
+                android:layout_weight="0.08" />
+
         </LinearLayout>
-        <TextView
-            android:id="@+id/txtActivity"
-            android:drawableStart="@drawable/ic_running_black_48dp"
-            android:text="@string/activity_initial"
-            android:textSize="20sp"
-            android:textColor="@android:color/holo_blue_dark"
-            android:layout_width="0dp"
-            android:layout_weight="1"
-            android:layout_height="wrap_content"
-            android:gravity="center" />
     </LinearLayout>
 
 
@@ -136,5 +144,16 @@
             ap:lineLabels="left|bottom"
             ap:lineLabelRotationBottom="-45"/>
     </LinearLayout>
+
+    <EditText
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/labelTextField"
+        android:layout_below="@+id/switchAccelerometer"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentEnd="true"
+        android:layout_marginRight="89dp"
+        android:layout_marginEnd="89dp"
+        android:layout_above="@+id/layoutAccelerometer" />
 
 </RelativeLayout>
