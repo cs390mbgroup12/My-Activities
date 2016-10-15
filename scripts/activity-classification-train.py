@@ -80,7 +80,7 @@ n_samples = 1000
 time_elapsed_seconds = (data[n_samples,0] - data[0,0]) / 1000
 sampling_rate = n_samples / time_elapsed_seconds
 
-feature_names = ["mean X", "mean Y", "mean Z", "var X", "var Y", "var Z"]
+feature_names = ["mean X", "mean Y", "mean Z", "var X"]
 class_names = ["Stationary", "Walking"]
 
 print("Extracting features and labels for window size {} and step size {}...".format(window_size, step_size))
@@ -119,7 +119,7 @@ sys.stdout.flush()
 plt.figure()
 formats = ['bo', 'go']
 for i in range(0,len(y),10): # only plot 1/10th of the points, it's a lot of data!
-    plt.plot(X[i,2], X[i,5], formats[int(y[i])])
+    plt.plot(X[i,0], X[i,3], formats[int(y[i])])
 
 plt.show()
 
@@ -131,21 +131,75 @@ plt.show()
 
 n = len(y)
 n_classes = len(class_names)
-
+C = 1.0
+totalPrec =[0,0,0]
+totalRecall = [0,0,0]
+totalAcc = 0
+clf = svm.SVC(kernel = 'linear', C=C )
 # TODO: Train and evaluate your decision tree classifier over 10-fold CV.
 # Report average accuracy, precision and recall metrics.
-
-cv = cross_validation.KFold(n, n_folds=10, shuffle=False, random_state=None)
+cv = cross_validation.KFold(n, n_folds=10, shuffle=True, random_state=None)
 
 for i, (train_indexes, test_indexes) in enumerate(cv):
+    X_train = X[train_indexes, :]
+    y_train = y[train_indexes]
+    X_test = X[test_indexes, :]
+    y_test = y[test_indexes]
+    clf.fit(X_train, y_train)
+    y_pred = clf.predict(X_test)
+    conf = confusion_matrix(y_test,y_pred)
     print("Fold {}".format(i))
+    print conf
+    totalDiag=0.0
+    total = 0.0
+    sumCol = []
+    prec = []
+    sumRow = []
+    recall = []
 
+    for x in range(conf.shape[0]):
+        totalDiag += conf[x][x]
+        total += sum(conf[x])
+        sumCol.append((float)(sum(conf[:,x])))
+        sumRow.append((float)(sum(conf[x,:])))
+        if np.isnan(conf[x][x]/sumCol[x]):
+            prec.append(0)
+        else:
+            prec.append(conf[x][x]/sumCol[x])
+            totalPrec[x] += conf[x][x]/sumCol[x]
+        if np.isnan(conf[x][x]/sumRow[x]):
+            recall.append(0)
+        else:
+            recall.append(conf[x][x]/sumRow[x])
+            totalRecall[x] +=conf[x][x]/sumRow[x]
+
+    acc = totalDiag / total
+
+    print("\n")
+
+
+
+# TODO: Output the average accuracy, precision and recall over the 10 folds
+    print "Accuracy: ",acc
+    print "Precision: ",prec
+    print "Recall: ",recall
+    print("\n")
+    totalAcc += acc
+
+
+print "Avg Accuracy: ", totalAcc/10
+print "Avg Precision: ", [x / 10 for x in totalPrec]
+print "Avg Recall: ", [x / 10 for x in totalRecall]
+clf.fit(X, y)
+
+tree = DecisionTreeClassifier(criterion ="entropy",max_depth=3)
+export_graphviz(tree, out_file='tree.dot', feature_names = feature_names)
 # TODO: Evaluate another classifier, i.e. SVM, Logistic Regression, k-NN, etc.
-
 # TODO: Once you have collected data, train your best model on the entire
 # dataset. Then save it to disk as follows:
 
 # when ready, set this to the best model you found, trained on all the data:
 best_classifier = None
+
 with open('classifier.pickle', 'wb') as f: # 'wb' stands for 'write bytes'
     pickle.dump(best_classifier, f)
