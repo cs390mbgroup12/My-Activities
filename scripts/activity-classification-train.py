@@ -205,7 +205,7 @@ export_graphviz(tree, out_file='tree.dot', feature_names = feature_names)
 # TODO: Evaluate another classifier, i.e. SVM, Logistic Regression, k-NN, etc.
 # TODO: Once you have collected data, train your best model on the entire
 # dataset. Then save it to disk as follows:
-print "LinearSVC"    
+print "LinearSVC"
 
 totalPrec =[0,0,0]
 totalRecall = [0,0,0]
