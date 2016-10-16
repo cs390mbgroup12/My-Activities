@@ -11,7 +11,7 @@ the server and uses your trained classifier to predict its class label.
 The label is then sent back to the Android application via the server.
 
 """
-
+import os
 import socket
 import sys
 import json
@@ -19,7 +19,10 @@ import threading
 import numpy as np
 import pickle
 from features import extract_features # make sure features.py is in the same directory
-from util import reorient, reset_vars
+from util import slidingWindow, reorient, reset_vars
+from sklearn import cross_validation
+from sklearn.metrics import confusion_matrix
+from sklearn.tree import DecisionTreeClassifier
 
 # TODO: Replace the string with your user ID
 user_id = "b9.49.29.1f.91.78.ea.3d.e9.35"
@@ -61,18 +64,53 @@ def predict(window):
     print("Buffer filled. Run your classifier.")
 
     # TODO: Predict class label
-    window_size = 20
-    step_size = 20
+
+    # %%---------------------------------------------------------------------------
+    #
+    #		                 Load Data From Disk
+    #
+    # -----------------------------------------------------------------------------
+
+    # print("Loading data...")
+    sys.stdout.flush()
+    data_file = os.path.join('data', 'my-activity-data.csv')
+    data = np.genfromtxt(data_file, delimiter=',')
+    # print("Loaded {} raw labelled activity data samples.".format(len(data)))
+    sys.stdout.flush()
+
+    # %%---------------------------------------------------------------------------
+    #
+    #		                    Pre-processing
+    #
+    # -----------------------------------------------------------------------------
+
+    # print("Reorienting accelerometer data...")
+    sys.stdout.flush()
+    reset_vars()
+    reoriented = np.asarray([reorient(data[i,1], data[i,2], data[i,3]) for i in range(len(data))])
+    reoriented_data_with_timestamps = np.append(data[:,0:1],reoriented,axis=1)
+    data = np.append(reoriented_data_with_timestamps, data[:,-1:], axis=1)
+
+
+    # %%---------------------------------------------------------------------------
+    #
+    #		                Extract Features & Labels
+    #
+    # -----------------------------------------------------------------------------
+
+    # you may want to play around with the window and step sizes
+    window_size = 25
+    step_size = 25
 
     # sampling rate for the sample data should be about 25 Hz; take a brief window to confirm this
-    n_samples = 1000
+    n_samples = 25
     time_elapsed_seconds = (data[n_samples,0] - data[0,0]) / 1000
     sampling_rate = n_samples / time_elapsed_seconds
 
     feature_names = ["std_magnitude", "medianX", "medianY", "medianZ", "meanX", "meanY", "meanZ", "stdX", "stdY", "stdZ", "mean_magnitude", "meancrossX", "meancrossY", "meancrossZ"]
-    class_names = ["Stationary", "Walking"]
+    class_names = ["Stationary", "Walking", "Running", "Jumping"]
 
-    print("Extracting features and labels for window size {} and step size {}...".format(window_size, step_size))
+    # print("Extracting features and labels for window size {} and step size {}...".format(window_size, step_size))
     sys.stdout.flush()
 
     n_features = len(feature_names)
@@ -84,16 +122,90 @@ def predict(window):
         # omit timestamp and label from accelerometer window for feature extraction:
         window = window_with_timestamp_and_label[:,1:-1]
         # extract features over window:
+        print window
         x = extract_features(window)
         # append features:
         X = np.append(X, np.reshape(x, (1,-1)), axis=0)
         # append label:
         y = np.append(y, window_with_timestamp_and_label[10, -1])
 
-    print("Finished feature extraction over {} windows".format(len(X)))
-    print("Unique labels found: {}".format(set(y)))
+    # print("Finished feature extraction over {} windows".format(len(X)))
+    # print("Unique labels found: {}".format(set(y)))
     sys.stdout.flush()
 
+    # %%---------------------------------------------------------------------------
+    #
+    #		                Train & Evaluate Classifier
+    #
+    # -----------------------------------------------------------------------------
+
+    n = len(y)
+    n_classes = len(class_names)
+
+    totalPrec =[0,0,0]
+    totalRecall = [0,0,0]
+    totalAcc = 0
+
+    # TODO: Train and evaluate your decision tree classifier over 10-fold CV.
+    # Report average accuracy, precision and recall metrics.
+    cv = cross_validation.KFold(n, n_folds=10, shuffle=True, random_state=None)
+
+    tree = DecisionTreeClassifier(criterion ="entropy",max_depth=3)
+
+    for i, (train_indexes, test_indexes) in enumerate(cv):
+        X_train = X[train_indexes, :]
+        y_train = y[train_indexes]
+        X_test = X[test_indexes, :]
+        y_test = y[test_indexes]
+        tree.fit(X_train, y_train)
+        y_pred = tree.predict(X_test)
+        conf = confusion_matrix(y_test,y_pred)
+        # print("Fold {}".format(i))
+        print conf
+        totalDiag=0.0
+        total = 0.0
+        sumCol = []
+        prec = []
+        sumRow = []
+        recall = []
+
+        for x in range(conf.shape[0]):
+            totalDiag += conf[x][x]
+            total += sum(conf[x])
+            sumCol.append((float)(sum(conf[:,x])))
+            sumRow.append((float)(sum(conf[x,:])))
+            if np.isnan(conf[x][x]/sumCol[x]):
+                prec.append(0)
+            else:
+                prec.append(conf[x][x]/sumCol[x])
+                totalPrec[x] += conf[x][x]/sumCol[x]
+            if np.isnan(conf[x][x]/sumRow[x]):
+                recall.append(0)
+            else:
+                recall.append(conf[x][x]/sumRow[x])
+                totalRecall[x] +=conf[x][x]/sumRow[x]
+
+        acc = totalDiag / total
+
+        print("\n")
+
+
+
+    # TODO: Output the average accuracy, precision and recall over the 10 folds
+        # print "Accuracy: ",acc
+        # print "Precision: ",prec
+        # print "Recall: ",recall
+        # print("\n")
+        totalAcc += acc
+
+
+    print "Avg Accuracy: ", totalAcc/10
+    print "Avg Precision: ", [x / 10 for x in totalPrec]
+    print "Avg Recall: ", [x / 10 for x in totalRecall]
+    tree.fit(X, y)
+
+    # with open('classifier.pickle', 'wb') as f: # 'wb' stands for 'write bytes'
+    #     pickle.dump(tree, f)
 
     return
 
