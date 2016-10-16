@@ -53,7 +53,7 @@
 
         <LinearLayout
             android:layout_width="0dp"
-            android:layout_weight="1"
+            android:layout_weight="0.68"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
             android:id="@+id/layout_step_count"
@@ -110,19 +110,18 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:gravity="center"
-                android:layout_weight="0.45" />
+                android:layout_weight="0.37" />
 
-            <Button
-                style="?android:attr/buttonStyleSmall"
+            <EditText
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Go"
-                android:id="@+id/labelButton"
-                android:layout_alignBaseline="@+id/labelTextField"
-                android:layout_alignBottom="@+id/labelTextField"
+                android:id="@+id/labelTextField"
+                android:layout_below="@+id/switchAccelerometer"
                 android:layout_alignParentRight="true"
                 android:layout_alignParentEnd="true"
-                android:layout_weight="0.08" />
+                android:layout_marginEnd="89dp"
+                android:layout_above="@+id/layoutAccelerometer"
+                android:layout_weight=".5" />
 
         </LinearLayout>
     </LinearLayout>
@@ -132,7 +131,8 @@
         xmlns:ap="http://schemas.android.com/apk/res-auto"
         android:layout_below="@id/layoutAccelerometer"
         android:layout_height="match_parent"
-        android:layout_width="match_parent">
+        android:layout_width="match_parent"
+        android:id="@+id/linearLayout">
 
         <com.androidplot.xy.XYPlot
             style="@style/APDefacto.Light"
@@ -145,15 +145,15 @@
             ap:lineLabelRotationBottom="-45"/>
     </LinearLayout>
 
-    <EditText
+    <Button
+        style="?android:attr/buttonStyleSmall"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:id="@+id/labelTextField"
-        android:layout_below="@+id/switchAccelerometer"
+        android:text="Go"
+        android:id="@+id/labelButton"
+        android:layout_weight="0.28"
+        android:layout_above="@+id/linearLayout"
         android:layout_alignParentRight="true"
-        android:layout_alignParentEnd="true"
-        android:layout_marginRight="89dp"
-        android:layout_marginEnd="89dp"
-        android:layout_above="@+id/layoutAccelerometer" />
+        android:layout_alignParentEnd="true" />
 
 </RelativeLayout>

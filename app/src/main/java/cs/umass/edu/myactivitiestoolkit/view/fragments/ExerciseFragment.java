@@ -43,6 +43,7 @@ import cs.umass.edu.myactivitiestoolkit.constants.Constants;
 import cs.umass.edu.myactivitiestoolkit.services.msband.BandService;
 import cs.umass.edu.myactivitiestoolkit.services.AccelerometerService;
 import cs.umass.edu.myactivitiestoolkit.services.ServiceManager;
+import cs.umass.edu.myactivitiestoolkit.view.activities.MainActivity;
 
 /**
  * Fragment which visualizes the 3-axis accelerometer signal, displays the step count estimates and
@@ -247,11 +248,17 @@ public class ExerciseFragment extends Fragment {
         txtServerStepCount = (TextView) view.findViewById(R.id.txtServerStepCount);
         labbie = (EditText) view.findViewById(R.id.labelTextField);
         labbieButton = (Button) view.findViewById (R.id.labelButton);
+
         labbieButton.setOnClickListener(new View.OnClickListener() {
 
             @Override
             public void onClick(View view) {
-
+                int label = Integer.parseInt(labbie.getText().toString());
+//                Log.d(TAG, "Inside on click method. Label is " + label);
+                Intent intent = new Intent(getActivity(), AccelerometerService.class);
+                intent.putExtra("label", label);
+                intent.setAction("edu.umass.cs.my-activities-toolkit.action.broadcast-label");
+                getActivity().startService(intent);
             }
         });
         //obtain reference to the activity text field

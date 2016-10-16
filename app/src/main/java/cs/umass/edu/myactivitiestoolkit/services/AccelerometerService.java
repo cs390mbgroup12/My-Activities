@@ -15,6 +15,9 @@ import org.json.JSONObject;
 
 import java.util.Locale;
 
+import android.content.BroadcastReceiver;
+import android.content.IntentFilter;
+import android.content.Context;
 import cs.umass.edu.myactivitiestoolkit.R;
 import cs.umass.edu.myactivitiestoolkit.constants.Constants;
 import cs.umass.edu.myactivitiestoolkit.processing.Filter;
@@ -104,6 +107,7 @@ public class AccelerometerService extends SensorService implements SensorEventLi
     private int mAndroidStepCount = 0;
     private int localStepCount = 0;
     private int serverStepCount = 0;
+    private int labbie = 0;
 
     public AccelerometerService(){
         mStepDetector = new StepDetector();
@@ -116,17 +120,19 @@ public class AccelerometerService extends SensorService implements SensorEventLi
             broadcastLocalStepCount(localStepCount);
         }
         public void onStepDetected(long timestamp, float[] values){
-//            Log.d(TAG, "Onstpepdetected");
-//            Intent intent = new Intent();
-//            intent.putExtra(Constants.KEY.TIMESTAMP, timestamp);
-//            intent.putExtra(Constants.KEY.ACCELEROMETER_DATA, values);
-//            intent.setAction(Constants.ACTION.BROADCAST_ACCELEROMETER_DATA);
-//            LocalBroadcastManager manager = LocalBroadcastManager.getInstance(AccelerometerService.this);
-//            manager.sendBroadcast(intent);
-//            broadcastServerStepCount(++localStepCount);
             broadcastStepDetected(timestamp, values);
         }
 
+    }
+
+    @Override
+    public int onStartCommand(Intent intent, int flags, int startId){
+        super.onStartCommand(intent, flags, startId);
+        if (intent.getAction().equals("edu.umass.cs.my-activities-toolkit.action.broadcast-label")) {
+            labbie = intent.getIntExtra("label", 0);
+            Log.d(TAG, "Received labbie..Label is " + labbie);
+        }
+        return START_STICKY;
     }
 
     @Override
@@ -259,9 +265,8 @@ public class AccelerometerService extends SensorService implements SensorEventLi
 
             //TODO: Send the accelerometer reading to the server
             //AccelerometerReading accelReading = new AccelerometerReading(mUserID, "MOBILE", "", System.currentTimeMillis(), event.values[0], event.values[1], event.values[2]);
-            int label = 5;
 
-            AccelerometerReading accelReading = new AccelerometerReading(mUserID, "MOBILE", "", (timestamp_in_milliseconds),label, (float)filtValues[0],(float)filtValues[1], (float)filtValues[2]);
+            AccelerometerReading accelReading = new AccelerometerReading(mUserID, "MOBILE", "", (timestamp_in_milliseconds),labbie, (float)filtValues[0],(float)filtValues[1], (float)filtValues[2]);
 
             mClient.sendSensorReading(accelReading);
 
@@ -352,4 +357,6 @@ public class AccelerometerService extends SensorService implements SensorEventLi
         LocalBroadcastManager manager = LocalBroadcastManager.getInstance(this);
         manager.sendBroadcast(intent);
     }
+    ///////////////////////////////////////////////////////////////////////////////////////////
+
 }

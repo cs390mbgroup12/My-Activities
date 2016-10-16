@@ -114,13 +114,14 @@ try:
                     x = data['data']['x']
                     y = data['data']['y']
                     z = data['data']['z']
-                    label = data['data']['label']
+                    label = data['label']
                     labelled_data.append([t, x, y, z, label])
                 
             sys.stdout.flush()
         except KeyboardInterrupt: 
             # occurs when the user presses Ctrl-C
             print("User Interrupt. Quitting...")
+            raise KeyboardInterrupt
             break
         except Exception as e:
             # ignore exceptions, such as parsing the json
