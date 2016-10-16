@@ -61,6 +61,39 @@ def predict(window):
     print("Buffer filled. Run your classifier.")
 
     # TODO: Predict class label
+    window_size = 20
+    step_size = 20
+
+    # sampling rate for the sample data should be about 25 Hz; take a brief window to confirm this
+    n_samples = 1000
+    time_elapsed_seconds = (data[n_samples,0] - data[0,0]) / 1000
+    sampling_rate = n_samples / time_elapsed_seconds
+
+    feature_names = ["std_magnitude", "medianX", "medianY", "medianZ", "meanX", "meanY", "meanZ", "stdX", "stdY", "stdZ", "mean_magnitude", "meancrossX", "meancrossY", "meancrossZ"]
+    class_names = ["Stationary", "Walking"]
+
+    print("Extracting features and labels for window size {} and step size {}...".format(window_size, step_size))
+    sys.stdout.flush()
+
+    n_features = len(feature_names)
+
+    X = np.zeros((0,n_features))
+    y = np.zeros(0,)
+
+    for i,window_with_timestamp_and_label in slidingWindow(data, window_size, step_size):
+        # omit timestamp and label from accelerometer window for feature extraction:
+        window = window_with_timestamp_and_label[:,1:-1]
+        # extract features over window:
+        x = extract_features(window)
+        # append features:
+        X = np.append(X, np.reshape(x, (1,-1)), axis=0)
+        # append label:
+        y = np.append(y, window_with_timestamp_and_label[10, -1])
+
+    print("Finished feature extraction over {} windows".format(len(X)))
+    print("Unique labels found: {}".format(set(y)))
+    sys.stdout.flush()
+
 
     return
 
