@@ -176,6 +176,7 @@ public class AccelerometerService extends SensorService implements SensorEventLi
                     return;
                 }
                 // TODO : broadcast activity to UI
+                broadcastActivity(activity);
             }
         });
     }
@@ -341,6 +342,14 @@ public class AccelerometerService extends SensorService implements SensorEventLi
         Intent intent = new Intent();
         intent.putExtra(Constants.KEY.STEP_COUNT, stepCount);
         intent.setAction("edu.umass.cs.my-activities-toolkit.action.broadcast-server-step-count");
+        LocalBroadcastManager manager = LocalBroadcastManager.getInstance(this);
+        manager.sendBroadcast(intent);
+    }
+
+    public void broadcastActivity (String activity) {
+        Intent intent = new Intent();
+        intent.putExtra(Constants.KEY.ACTIVITY, activity);
+        intent.setAction(Constants.ACTION.BROADCAST_ACTIVITY);
         LocalBroadcastManager manager = LocalBroadcastManager.getInstance(this);
         manager.sendBroadcast(intent);
     }

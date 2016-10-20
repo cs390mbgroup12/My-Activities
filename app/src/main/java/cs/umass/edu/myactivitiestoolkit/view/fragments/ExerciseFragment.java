@@ -219,9 +219,12 @@ public class ExerciseFragment extends Fragment {
                         mPeakValues.add(values[2]); //place on z-axis signal
                     }
                 } else if (intent.getAction().equals("edu.umass.cs.my-activities-toolkit.action.broadcast-server-step-count")) {
-                    Log.d(TAG, "in SENSOR_STEP");
+//                    Log.d(TAG, "in SENSOR_STEP");
                     int stepCount = intent.getIntExtra(Constants.KEY.STEP_COUNT, 0);
                     displayServerStepCount(stepCount);
+                }else if (intent.getAction().equals(Constants.ACTION.BROADCAST_ACTIVITY)){
+                    String activity = intent.getStringExtra(Constants.KEY.ACTIVITY);
+                    displayActivity(activity);
                 }
             }
         }
@@ -356,6 +359,7 @@ public class ExerciseFragment extends Fragment {
         filter.addAction("edu.umass.cs.my-activities-toolkit.action.broadcast-server-step-count");
         filter.addAction(Constants.ACTION.BROADCAST_ANDROID_STEP_COUNT);
         filter.addAction(Constants.ACTION.BROADCAST_LOCAL_STEP_COUNT);
+        filter.addAction(Constants.ACTION.BROADCAST_ACTIVITY);
         broadcastManager.registerReceiver(receiver, filter);
     }
 
@@ -424,6 +428,16 @@ public class ExerciseFragment extends Fragment {
             }
         });
     }
+
+    private void displayActivity(final String activity){
+        getActivity().runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                txtActivity.setText(activity);
+            }
+        });
+    }
+
     /**
      * Clears the x, y, z and peak plot data series.
      */

@@ -46,7 +46,7 @@ import pickle
 
 print("Loading data...")
 sys.stdout.flush()
-data_file = os.path.join('data', 'sample-data.csv')
+data_file = os.path.join('data', 'all-data.csv')
 data = np.genfromtxt(data_file, delimiter=',')
 print("Loaded {} raw labelled activity data samples.".format(len(data)))
 sys.stdout.flush()
@@ -81,7 +81,7 @@ time_elapsed_seconds = (data[n_samples,0] - data[0,0]) / 1000
 sampling_rate = n_samples / time_elapsed_seconds
 
 feature_names = ["std_magnitude", "medianX", "medianY", "medianZ", "meanX", "meanY", "meanZ", "stdX", "stdY", "stdZ", "mean_magnitude", "meancrossX", "meancrossY", "meancrossZ"]
-class_names = ["Stationary", "Walking"]
+class_names = ["Stationary", "Walking", "Running", "Jumping"]
 
 print("Extracting features and labels for window size {} and step size {}...".format(window_size, step_size))
 sys.stdout.flush()
@@ -117,12 +117,12 @@ sys.stdout.flush()
 print("Plotting data points...")
 sys.stdout.flush()
 plt.figure()
-formats = ['bo', 'go']
+formats = ['bo', 'go', 'yo', 'ro']
 for i in range(0,len(y),10): # only plot 1/10th of the points, it's a lot of data!
     # Graph 1: std_magnitude vs medianZ
-    plt.plot(X[i,0], X[i,3], formats[int(y[i])])
+    # plt.plot(X[i,0], X[i,3], formats[int(y[i])])
     # Graph 2: meanX vs stdX
-    # plt.plot(X[i,4], X[i,7], formats[int(y[i])])
+    plt.plot(X[i,4], X[i,7], formats[int(y[i])])
     # Graph 3: mean_magnitude vs meanCrossingZ
     # plt.plot(X[i,10], X[i,13], formats[int(y[i])])
 
@@ -137,15 +137,15 @@ plt.show()
 n = len(y)
 n_classes = len(class_names)
 
-totalPrec =[0,0,0]
-totalRecall = [0,0,0]
+totalPrec =[0,0,0,0]
+totalRecall = [0,0,0,0]
 totalAcc = 0
 
 # TODO: Train and evaluate your decision tree classifier over 10-fold CV.
 # Report average accuracy, precision and recall metrics.
 cv = cross_validation.KFold(n, n_folds=10, shuffle=True, random_state=None)
 
-tree = DecisionTreeClassifier(criterion ="entropy",max_depth=3)
+tree = DecisionTreeClassifier(criterion ="entropy",max_depth=10,max_features=10)
 
 for i, (train_indexes, test_indexes) in enumerate(cv):
     X_train = X[train_indexes, :]
@@ -205,61 +205,61 @@ export_graphviz(tree, out_file='tree.dot', feature_names = feature_names)
 # TODO: Evaluate another classifier, i.e. SVM, Logistic Regression, k-NN, etc.
 # TODO: Once you have collected data, train your best model on the entire
 # dataset. Then save it to disk as follows:
-print "LinearSVC"
-
-totalPrec =[0,0,0]
-totalRecall = [0,0,0]
-totalAcc = 0
-
-liney = svm.LinearSVC()
-for i, (train_indexes, test_indexes) in enumerate(cv):
-    X_train = X[train_indexes, :]
-    y_train = y[train_indexes]
-    X_test = X[test_indexes, :]
-    y_test = y[test_indexes]
-    liney.fit(X_train, y_train)
-    y_pred = liney.predict(X_test)
-    conf = confusion_matrix(y_test,y_pred)
-    print("Fold {}".format(i))
-    print conf
-    totalDiag=0.0
-    total = 0.0
-    sumCol = []
-    prec = []
-    sumRow = []
-    recall = []
-
-    for x in range(conf.shape[0]):
-        totalDiag += conf[x][x]
-        total += sum(conf[x])
-        sumCol.append((float)(sum(conf[:,x])))
-        sumRow.append((float)(sum(conf[x,:])))
-        if np.isnan(conf[x][x]/sumCol[x]):
-            prec.append(0)
-        else:
-            prec.append(conf[x][x]/sumCol[x])
-            totalPrec[x] += conf[x][x]/sumCol[x]
-        if np.isnan(conf[x][x]/sumRow[x]):
-            recall.append(0)
-        else:
-            recall.append(conf[x][x]/sumRow[x])
-            totalRecall[x] +=conf[x][x]/sumRow[x]
-
-    acc = totalDiag / total
-
-    print("\n")
-
-    print "Accuracy: ",acc
-    print "Precision: ",prec
-    print "Recall: ",recall
-    print("\n")
-    totalAcc += acc
-
-
-print "Avg Accuracy: ", totalAcc/10
-print "Avg Precision: ", [x / 10 for x in totalPrec]
-print "Avg Recall: ", [x / 10 for x in totalRecall]
-liney.fit(X, y)
+# print "LinearSVC"
+#
+# totalPrec =[0,0,0]
+# totalRecall = [0,0,0]
+# totalAcc = 0
+#
+# liney = svm.LinearSVC()
+# for i, (train_indexes, test_indexes) in enumerate(cv):
+#     X_train = X[train_indexes, :]
+#     y_train = y[train_indexes]
+#     X_test = X[test_indexes, :]
+#     y_test = y[test_indexes]
+#     liney.fit(X_train, y_train)
+#     y_pred = liney.predict(X_test)
+#     conf = confusion_matrix(y_test,y_pred)
+#     print("Fold {}".format(i))
+#     print conf
+#     totalDiag=0.0
+#     total = 0.0
+#     sumCol = []
+#     prec = []
+#     sumRow = []
+#     recall = []
+#
+#     for x in range(conf.shape[0]):
+#         totalDiag += conf[x][x]
+#         total += sum(conf[x])
+#         sumCol.append((float)(sum(conf[:,x])))
+#         sumRow.append((float)(sum(conf[x,:])))
+#         if np.isnan(conf[x][x]/sumCol[x]):
+#             prec.append(0)
+#         else:
+#             prec.append(conf[x][x]/sumCol[x])
+#             totalPrec[x] += conf[x][x]/sumCol[x]
+#         if np.isnan(conf[x][x]/sumRow[x]):
+#             recall.append(0)
+#         else:
+#             recall.append(conf[x][x]/sumRow[x])
+#             totalRecall[x] +=conf[x][x]/sumRow[x]
+#
+#     acc = totalDiag / total
+#
+#     print("\n")
+#
+#     print "Accuracy: ",acc
+#     print "Precision: ",prec
+#     print "Recall: ",recall
+#     print("\n")
+#     totalAcc += acc
+#
+#
+# print "Avg Accuracy: ", totalAcc/10
+# print "Avg Precision: ", [x / 10 for x in totalPrec]
+# print "Avg Recall: ", [x / 10 for x in totalRecall]
+# liney.fit(X, y)
 ################################################
 
 
