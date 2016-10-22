@@ -1,5 +1,7 @@
 package cs.umass.edu.myactivitiestoolkit.services;
 
+import java.util.ArrayList;
+
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
@@ -112,11 +114,14 @@ public class PPGService extends SensorService implements PPGListener
     @Override
     protected void registerSensors() {
         // TODO: Register a PPG listener with the PPG sensor (mPPGSensor)
+        mPPGSensor.registerListener(this);
+
     }
 
     @Override
     protected void unregisterSensors() {
         // TODO: Unregister the PPG listener
+        mPPGSensor.unregisterListener(this);
     }
 
     @Override
@@ -155,15 +160,71 @@ public class PPGService extends SensorService implements PPGListener
      * @see MobileIOClient
      * @see HRSensorReading
      */
+
+    long winStartie = 0;
+    final long window = 7000;
+    int buffCount = 0;
+    ArrayList<PPGEvent> buffer = new ArrayList<PPGEvent>(100);
     @SuppressWarnings("deprecation")
     @Override
     public void onSensorChanged(PPGEvent event) {
         // TODO: Smooth the signal using a Butterworth / exponential smoothing filter
+        Filter filter = new Filter(1);
+        double [] filteredValues = filter.getFilteredValues((float)event.value);
         // TODO: send the data to the UI fragment for visualization, using broadcastPPGReading(...)
+//        Log.d(TAG, "The event timestamp: " + event.timestamp);
+//        Log.d(TAG, "The event value: " + event.value);
+        broadcastPPGReading(event.timestamp, event.value);
         // TODO: Send the filtered mean red value to the server
+        HRSensorReading reading = new HRSensorReading(mUserID, "MOBILE", "", event.timestamp, filteredValues[0]);
+        mClient.sendSensorReading(reading);
         // TODO: Buffer data if necessary for your algorithm
         // TODO: Call your heart beat and bpm detection algorithm
-        // TODO: Send your heart rate estimate to the server
+        double heartRate = 0.0;
+        if (buffer.isEmpty())
+            winStartie = event.timestamp;
+        if(event.timestamp - winStartie >= window){
+            // Call heart beat algo on buffer
+            Log.d(TAG, "THe buffCount is " + buffCount);
+            int heartbeat = getHeartbeat(buffer, buffCount);
+            heartRate = (double)(heartbeat * (60000 / window));
+            broadcastBPM((int) heartRate);
+            buffer = new ArrayList<PPGEvent> (100);
+            buffCount = 0;
+        } else{
+            buffer.add(event);
+            buffCount++;
+        }
+
+    }
+
+    public int getHeartbeat (ArrayList<PPGEvent> buffer, int buffCount) {
+        int sum = 0;
+
+        for (int i = 0; i < buffCount; i++) {
+            sum += buffer.get(i).value;
+        }
+
+        double mean = (double)(sum / buffCount);
+        double anteCrossVal = 0;
+        int numHeartbeats = 0;
+
+        boolean isGreater = (buffer.get(0).value >= mean);
+        for (int i = 1; i < buffCount; i++) {
+            if (buffer.get(i).value > mean) {
+                anteCrossVal = buffer.get(i).value;
+                isGreater = true;
+            } else {
+                if (isGreater == true) {
+//                    if (anteCrossVal - buffer.get(i).value > 1.0) {
+                        numHeartbeats++;
+                        isGreater = false;
+//                    }
+                }
+            }
+        }
+
+        return numHeartbeats;
     }
 
     /**

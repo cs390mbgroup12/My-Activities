@@ -226,6 +226,22 @@ public class HeartRateCameraView extends SurfaceView implements Callback, Camera
         ImageFormatConverter.decodeYUV420SP(pixels, data, width, height);
 
         //TODO: Compute the mean red value and notify all listeners
+        int sum = 0;
+        for(int i = 0; i < pixels.length; i++){
+            sum+=Color.red(pixels[i]);
+        }
+
+        double mean = sum / pixels.length;
+        PPGEvent event = new PPGEvent(mean, System.currentTimeMillis());
+
+        for (int i = 0; i < listeners.size(); i++) {
+            listeners.get(i).onSensorChanged(event);
+        }
+
+
+
+
+
     }
 
     /**
