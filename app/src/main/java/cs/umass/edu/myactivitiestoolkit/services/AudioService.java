@@ -15,6 +15,7 @@ import cs.umass.edu.myactivitiestoolkit.audio.MicrophoneRecorder;
 import cs.umass.edu.myactivitiestoolkit.constants.Constants;
 import cs.umass.edu.myactivitiestoolkit.view.fragments.AudioFragment;
 import edu.umass.cs.MHLClient.client.MessageReceiver;
+import edu.umass.cs.MHLClient.sensors.SensorReading;
 
 /**
  * The audio service records audio data from the microphone. Data is recorded at 8 kHz, meaning
@@ -142,7 +143,13 @@ public class AudioService extends SensorService implements MicrophoneRecorder.Mi
     public void microphoneBuffer(short[] buffer, int window_size) {
         Log.d(TAG, String.valueOf(buffer.length));
 
+//        public AudioBufferReading(String userID, String deviceType, String deviceID, long t, short[] buffer) {
+//            super(userID, deviceType, deviceID, "SENSOR_AUDIO", t);
+//            this.buffer = buffer;
+//        }
         //TODO: Send the audio buffer to the server
+        SensorReading audio_reading = new AudioBufferReading(mUserID, "MOBILE", "", System.currentTimeMillis(), buffer);
+        mClient.sendSensorReading(audio_reading);
 
         //convert short[] to double[] for computing spectrogram
         double[] dBuffer = new double[buffer.length];
