@@ -122,7 +122,15 @@ class FeatureExtractor():
         You should compute the distribution of the frequencies in fixed bins.
         This will give you a feature vector of length len(bins).
         """
-        return [1] # returns dummy value; replace this with the features you extract
+
+        (freq, bandwidth) = self._compute_formants(window) 
+        #minFreq = np.min(freq)
+        #maxFreq = np.max(freq)        
+        (histogram, bins) = np.histogram(freq, range=(0, 5500))
+        maxIndex = np.argmax(histogram)
+        emi = np.average([bins[maxIndex], bins[maxIndex+1]])
+        
+        return emi # returns dummy value; replace this with the features you extract
 
     def _compute_pitch_contour(self, window):
         """
@@ -172,7 +180,15 @@ class FeatureExtractor():
         
         You may also want to return the average pitch and standard deviation.
         """
-        return [1] # returns dummy value; replace this with the features you extract
+        
+        (pitch_contour, confidence_curve) = self._compute_pitch_contour(window)         
+        #minPitch = np.min(pitch_contour)
+        #maxPitch = np.max(pitch_contour)        
+        (histogram, bins) = np.histogram(pitch_contour, range=(0, 128))
+        #maxIndex = np.argmax(histogram)
+        #emi = np.average([bins[maxIndex], bins[maxIndex+1]])
+        
+        return histogram # returns dummy value; replace this with the features you extract
 
     def _compute_mfcc(self, window):
         """
@@ -210,7 +226,21 @@ class FeatureExtractor():
         See section "Deltas and Delta-Deltas" at http://practicalcryptography.com/miscellaneous/machine-learning/guide-mel-frequency-cepstral-coefficients-mfccs/.
         
         """
-        return [1] # returns dummy value; replace this with the features you extract
+        deltas = []
+        mfccs = self._compute_mfcc(window)
+        denom = 2 * np.sum(np.square((np.arange(1, n+1))))
+        #padded_mfccs = np.pad(mfccs, (1,1), 'constant', constant_values=(0,0))
+        for t in range(len(mfccs)):
+            sum = 0
+            for n in range(len(mfccs)):
+                try:
+                    sum += n * mfccs[t+n] * mfccs[t-n]
+                except IndexError: 
+                    continue
+            delta = sum / denom
+            deltas.append(delta)
+
+        return deltas # returns dummy value; replace this with the features you extract
         
     def _recognize_speech(window):
         """
