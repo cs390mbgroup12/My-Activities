@@ -22,7 +22,7 @@ from features import FeatureExtractor
 import os
 
 # TODO: Replace the string with your user ID
-user_id = ""
+user_id = "b9.49.29.1f.91.78.ea.3d.e9.35"
 
 '''
     This socket is used to send data back through the data collection server.
@@ -71,7 +71,15 @@ def predict(window):
     # When you get a label, send it to the UI by calling onSpeakerDetected:
     # onSpeakerDetected(speaker)
     
-    return
+    class_names = ["Nospeaker", "Kawo", "Stanley", "Emily"] 
+    
+    x = feature_extractor.extract_features(window)
+    features = np.zeros((0,1038))
+    features = np.append(features, np.reshape(x, (1,-1)), axis=0)
+    labbie = classifier.predict(features)
+    speaker = onSpeakerDetected(class_names[int(labbie[0])])
+    print class_names[int(labbie[0])]
+    return speaker
     
     
 

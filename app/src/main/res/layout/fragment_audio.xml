@@ -29,8 +29,28 @@
         android:id="@+id/imgSpectrogram"
         android:layout_width="300dp"
         android:layout_height="300dp"
+        tools:ignore="ContentDescription"
+        android:layout_below="@+id/switchMicrophone"
+        android:layout_centerHorizontal="true" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceLarge"
+        android:text="Speaker:"
+        android:id="@+id/textViewSpeakerHeading"
+        android:editable="false"
+        android:layout_alignBottom="@+id/imgSpectrogram"
+        android:layout_centerHorizontal="true" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceLarge"
+        android:text="..."
+        android:id="@+id/textViewSpeakerName"
+        android:layout_below="@+id/imgSpectrogram"
         android:layout_centerHorizontal="true"
-        android:layout_centerVertical="true"
-        tools:ignore="ContentDescription" />
+        android:layout_marginTop="55dp" />
 
 </RelativeLayout>

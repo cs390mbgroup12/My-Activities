@@ -112,10 +112,69 @@ sys.stdout.flush()
 n = len(y)
 n_classes = len(class_names)
 
+totalPrec =[0,0,0,0]
+totalRecall = [0,0,0,0]
+totalAcc = 0
+
 # TODO: Train your classifier!
+cv = cross_validation.KFold(n, n_folds=10, shuffle=True, random_state=None)
+
+tree = DecisionTreeClassifier(criterion ="entropy",max_depth=10,max_features=10)
+
+for i, (train_indexes, test_indexes) in enumerate(cv):
+    X_train = X[train_indexes, :]
+    y_train = y[train_indexes]
+    X_test = X[test_indexes, :]
+    y_test = y[test_indexes]
+    tree.fit(X_train, y_train)
+    y_pred = tree.predict(X_test)
+    conf = confusion_matrix(y_test,y_pred)
+    print("Fold {}".format(i))
+    print conf
+    totalDiag=0.0
+    total = 0.0
+    sumCol = []
+    prec = []
+    sumRow = []
+    recall = []
+
+    for x in range(conf.shape[0]):
+        totalDiag += conf[x][x]
+        total += sum(conf[x])
+        sumCol.append((float)(sum(conf[:,x])))
+        sumRow.append((float)(sum(conf[x,:])))
+        if np.isnan(conf[x][x]/sumCol[x]):
+            prec.append(0)
+        else:
+            prec.append(conf[x][x]/sumCol[x])
+            totalPrec[x] += conf[x][x]/sumCol[x]
+        if np.isnan(conf[x][x]/sumRow[x]):
+            recall.append(0)
+        else:
+            recall.append(conf[x][x]/sumRow[x])
+            totalRecall[x] +=conf[x][x]/sumRow[x]
+
+    acc = totalDiag / total
+
+    print("\n")
+
+
+
+# TODO: Output the average accuracy, precision and recall over the 10 folds
+    print "Accuracy: ",acc
+    print "Precision: ",prec
+    print "Recall: ",recall
+    print("\n")
+    totalAcc += acc
+
+
+print "Avg Accuracy: ", totalAcc/10
+print "Avg Precision: ", [x / 10 for x in totalPrec]
+print "Avg Recall: ", [x / 10 for x in totalRecall]
+tree.fit(X, y)
 
 # TODO: set your best classifier below, then uncomment the following line to train it on ALL the data:
-best_classifier = None
+best_classifier = tree
 # best_classifier.fit(X,y) 
 
 classifier_filename='classifier.pickle'

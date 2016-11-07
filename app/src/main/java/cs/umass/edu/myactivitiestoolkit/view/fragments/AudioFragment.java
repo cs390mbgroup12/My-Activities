@@ -19,7 +19,10 @@ import android.view.ViewGroup;
 import android.widget.CompoundButton;
 import android.widget.ImageView;
 import android.widget.Switch;
+import android.widget.TextView;
 import android.widget.Toast;
+
+import java.util.Locale;
 
 import cs.umass.edu.myactivitiestoolkit.R;
 import cs.umass.edu.myactivitiestoolkit.constants.Constants;
@@ -52,6 +55,8 @@ public class AudioFragment extends Fragment {
     /** The image displaying the audio spectrogram. **/
     private ImageView imgSpectrogram;
 
+    private TextView speakerName;
+
     /** The switch which toggles the {@link AudioService}. **/
     private Switch switchRecord;
 
@@ -75,6 +80,9 @@ public class AudioFragment extends Fragment {
                 } else if (intent.getAction().equals(Constants.ACTION.BROADCAST_SPECTROGRAM)){
                     double[][] spectrogram = (double[][]) intent.getSerializableExtra(Constants.KEY.SPECTROGRAM);
                     updateSpectrogram(spectrogram);
+                } else if(intent.getAction().equals(Constants.ACTION.BROADCAST_SPEAKER_NAME)){
+                    String name = intent.getStringExtra(Constants.KEY.SPEAKER_NAME);
+                    displaySpeakerName(name);
                 }
             }
         }
@@ -103,6 +111,7 @@ public class AudioFragment extends Fragment {
             }
         });
         imgSpectrogram = (ImageView) rootView.findViewById(R.id.imgSpectrogram);
+        speakerName = (TextView) rootView.findViewById(R.id.textViewSpeakerName);
         return rootView;
     }
 
@@ -133,6 +142,7 @@ public class AudioFragment extends Fragment {
         IntentFilter filter = new IntentFilter();
         filter.addAction(Constants.ACTION.BROADCAST_MESSAGE);
         filter.addAction(Constants.ACTION.BROADCAST_SPECTROGRAM);
+        filter.addAction(Constants.ACTION.BROADCAST_SPEAKER_NAME);
         broadcastManager.registerReceiver(receiver, filter);
     }
 
@@ -246,5 +256,14 @@ public class AudioFragment extends Fragment {
         int r = (int) Math.max(0, 255 * (ratio - 1));
         int g = 255 - b - r;
         return (r<<16|g<<8|b|255<<24);
+    }
+
+    private void displaySpeakerName(final String name){
+        getActivity().runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                speakerName.setText(name);
+            }
+        });
     }
 }
