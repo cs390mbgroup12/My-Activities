@@ -15,10 +15,12 @@ import com.microsoft.band.BandException;
 import com.microsoft.band.BandIOException;
 import com.microsoft.band.BandInfo;
 import com.microsoft.band.ConnectionState;
+import com.microsoft.band.UserConsent;
 import com.microsoft.band.sensors.BandAccelerometerEventListener;
 import com.microsoft.band.sensors.BandGyroscopeEvent;
 import com.microsoft.band.sensors.BandGyroscopeEventListener;
 import com.microsoft.band.sensors.SampleRate;
+import com.microsoft.band.sensors.HeartRateConsentListener;
 
 import cs.umass.edu.myactivitiestoolkit.R;
 import cs.umass.edu.myactivitiestoolkit.constants.Constants;
@@ -95,10 +97,6 @@ public class BandService extends SensorService implements BandGyroscopeEventList
                     myStepListener mStepListener = new myStepListener();
                     mStepDetector.registerOnStepListener(mStepListener);
 
-
-//                    mSensorManager.registerListener(mStepDetector, mAccelerometerSensor, SensorManager.SENSOR_DELAY_NORMAL);
-//                    OnStepListener sListen = new myStepListener();
-//                    mStepDetector.registerOnStepListener(sListen);
                 } else {
                     broadcastStatus(getString(R.string.status_not_connected));
                 }
@@ -138,9 +136,11 @@ public class BandService extends SensorService implements BandGyroscopeEventList
                 broadcastStatus(getString(R.string.status_not_paired));
                 return false;
             }
-            bandClient = BandClientManager.getInstance().create(getBaseContext(), devices[0]);
-        } else if (ConnectionState.CONNECTED == bandClient.getConnectionState()) {
-            return true;
+                bandClient = BandClientManager.getInstance().create(getBaseContext(), devices[0]);
+        } else {
+            if (ConnectionState.CONNECTED == bandClient.getConnectionState()) {
+                    return true;
+            }
         }
 
         broadcastStatus(getString(R.string.status_connecting));

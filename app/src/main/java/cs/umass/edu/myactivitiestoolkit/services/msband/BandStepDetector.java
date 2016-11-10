@@ -1,8 +1,5 @@
 package cs.umass.edu.myactivitiestoolkit.services.msband;
 
-import android.hardware.Sensor;
-import android.hardware.SensorEvent;
-import android.hardware.SensorEventListener;
 import android.util.Log;
 
 import com.microsoft.band.sensors.BandAccelerometerEvent;
