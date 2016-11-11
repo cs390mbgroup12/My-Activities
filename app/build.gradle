@@ -31,5 +31,5 @@ dependencies {
     compile 'com.android.support:support-v13:24.2.0'
     compile 'com.google.android.gms:play-services-maps:9.4.0'
     compile 'com.androidplot:androidplot-core:1.0.0'
-    compile 'com.google.android.gms:play-services:9.4.0'
+   // compile 'com.google.android.gms:play-services:9.4.0'
 }
