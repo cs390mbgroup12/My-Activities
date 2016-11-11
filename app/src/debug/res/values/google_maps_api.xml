@@ -3,6 +3,6 @@
     TODO: For assignment 5, you need a Google Maps API key.
     -->
     <string name="google_maps_key" templateMergeStrategy="preserve" translatable="false">
-        AIzaSyBfRb_WXHWJHK3GMsVoFHhI-0nUh5gDNB0
+        AIzaSyA5dtAFGZg_dHiZ-Ate2N7Y8G8J_EziOMA
     </string>
 </resources>
