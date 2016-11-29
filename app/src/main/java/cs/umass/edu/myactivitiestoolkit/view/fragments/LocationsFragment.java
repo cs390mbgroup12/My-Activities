@@ -368,6 +368,11 @@ public class LocationsFragment extends Fragment {
     private void drawClusters(final Collection<Cluster<GPSLocation>> clusters){
         final int[] colors = new int[]{Color.RED, Color.BLUE, Color.GREEN, Color.YELLOW, Color.CYAN, Color.WHITE};
         // TODO: For each cluster, draw a convex hull around the points in a sufficiently distinct color
+        int count =0;
+        for(Cluster<GPSLocation> cluster:clusters) {
+            drawHullFromPoints((GPSLocation[])cluster.getPoints().toArray(), colors[count]);
+            count = (count + 1) % colors.length;
+        }
     }
 
     /**
@@ -379,6 +384,13 @@ public class LocationsFragment extends Fragment {
      */
     private void runDBScan(GPSLocation[] locations, float eps, int minPts){
         //TODO: Cluster the locations by calling DBScan.
+        DBScan scannie = new DBScan(eps, minPts);
+        Collection<GPSLocation> lok = new ArrayList<GPSLocation>();
+        for (GPSLocation l: locations){
+            lok.add(l);
+        }
+        List<Cluster> lokkie = scannie.cluster(lok);
+
     }
 
     /**
