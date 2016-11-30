@@ -43,6 +43,7 @@ def cluster(latitudes, longitudes, algorithm, *args):
     TODO: You should construct a N x 2 matrix of (latitude, longitude) pairs, 
     where N is the number of locations (= len(latitudes) = len(longitudes)).
     
+
     Then according to the algorithm parameter ("k_means" or "mean_shift"), 
     call the appropriate scikit-learn function. For k-means, k=args[0].
     
@@ -57,7 +58,20 @@ def cluster(latitudes, longitudes, algorithm, *args):
     """
     
     # TODO: Do what the comments / assignment details tell you to do.
-    
+    matrix = np.array([latitudes,longitudes])
+    new_matrix = np.transpose(matrix)
+    # print new_matrix
+    if algorithm == "k_means":
+        kmean = KMeans(n_clusters=args[0]).fit(new_matrix)
+        print kmean.labels_
+        send_clusters(kmean.labels_)
+    elif algorithm == "mean_shift":
+        meanS = MeanShift().fit(new_matrix)
+        print meanS.labels_
+        send_clusters(meanS.labels_)
+    else:
+        print "Unknown algorithm"
+
     return
     
     
@@ -144,6 +158,7 @@ try:
                     k = data['data']['k']
                     latitudes=data['data']['latitudes']
                     longitudes=data['data']['longitudes']
+                    print latitudes, longitudes, algorithm, k
                     cluster(latitudes, longitudes, algorithm, k)
                 
             sys.stdout.flush()

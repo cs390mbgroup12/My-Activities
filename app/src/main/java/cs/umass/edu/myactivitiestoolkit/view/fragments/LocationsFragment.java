@@ -369,8 +369,16 @@ public class LocationsFragment extends Fragment {
         final int[] colors = new int[]{Color.RED, Color.BLUE, Color.GREEN, Color.YELLOW, Color.CYAN, Color.WHITE};
         // TODO: For each cluster, draw a convex hull around the points in a sufficiently distinct color
         int count =0;
-        for(Cluster<GPSLocation> cluster:clusters) {
-            drawHullFromPoints((GPSLocation[])cluster.getPoints().toArray(), colors[count]);
+        System.out.println("In LocationFragment: drawclusters");
+        System.out.println("In LocationFragment: drawclusters " + clusters.size());
+        for(Cluster<GPSLocation> cluster: clusters) {
+            System.out.println("In LocationFragment: drawclusters: drawing hull :3");
+            Object[] clusterPoints = cluster.getPoints().toArray();
+            GPSLocation[] GPSPoints = new GPSLocation[clusterPoints.length];
+            for(int i = 0; i < clusterPoints.length; i++){
+                GPSPoints[i] = (GPSLocation) clusterPoints[i];
+            }
+            drawHullFromPoints(GPSPoints, colors[count]);
             count = (count + 1) % colors.length;
         }
     }
@@ -389,7 +397,9 @@ public class LocationsFragment extends Fragment {
         for (GPSLocation l: locations){
             lok.add(l);
         }
-        List<Cluster> lokkie = scannie.cluster(lok);
+        List<Cluster<GPSLocation>> lokkie = scannie.cluster(lok);
+        System.out.println("In LocationFragment: runDBscan: after cluster");
+        this.drawClusters((ArrayList<Cluster<GPSLocation>>)lokkie);
 
     }
 
@@ -429,6 +439,7 @@ public class LocationsFragment extends Fragment {
                         int index = indexes[i];
                         //TODO: Using the index of each location, generate a list of k clusters, then call drawClusters().
                         //You may choose to use the Map defined above or find a different way of doing it.
+
                     }
 
                     // We are only allowed to manipulate the map on the main (UI) thread:
