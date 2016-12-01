@@ -32,6 +32,7 @@ import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapView;
 import com.google.android.gms.maps.MapsInitializer;
 import com.google.android.gms.maps.OnMapReadyCallback;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.Marker;
@@ -377,6 +378,20 @@ public class LocationsFragment extends Fragment {
             for(int i = 0; i < clusterPoints.length; i++){
                 GPSPoints[i] = (GPSLocation) clusterPoints[i];
             }
+            double avgLong = 0.0;
+            double avgLat = 0.0;
+            double sumLong = 0.0;
+            double sumLat = 0.0;
+            for(int i = 0; i < GPSPoints.length; i++){
+                GPSLocation curr = GPSPoints[i];
+                sumLong += curr.longitude;
+                sumLat += curr.latitude;
+            }
+            avgLong = sumLong / GPSPoints.length;
+            avgLat = sumLat / GPSPoints.length;
+            map.addMarker(new MarkerOptions()
+                    .position(new LatLng(avgLat, avgLong)).title("Center")
+                    .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_AZURE)));
             drawHullFromPoints(GPSPoints, colors[count]);
             count = (count + 1) % colors.length;
         }
