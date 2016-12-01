@@ -93,7 +93,7 @@ public class DBScan<T extends Clusterable<T>> {
         /** maps a point T to true or false, indicating whether that point has been visited or not */
         Map<T, State> states = new HashMap<T, State>();
 
-        System.out.println("In DBScan cluster");
+//        System.out.println("In DBScan cluster");
 
         //initialize all points' state to UNVISITED
         for (final T p : points){
@@ -108,16 +108,14 @@ public class DBScan<T extends Clusterable<T>> {
             if(s != State.UNVISITED){
                 continue;
             }
-            states.put(p, State.CLUSTERED);
             List<T> neighbors = this.regionQuery(p, points);
             if(neighbors.size() < minPts){
-                System.out.println("In DBScan cluster: neighbords.siuze() < minpts");
                 states.put(p, State.NOISE);
             }else{
-                System.out.println("In DBScan cluster: neighbords.siuze() >= minpts");
-                clusters.add(C);
                 C = new Cluster<T>();
+                clusters.add(C);
                 expandCluster(C, p, states, neighbors, points);
+
             }
         }
 //            for each point P in dataset D {
@@ -161,25 +159,27 @@ public class DBScan<T extends Clusterable<T>> {
                                      final List<T> neighborPts, final Collection<T> points) {
 
         //we added the point p to the cluster and also flagged it as clustered for you, to demonstrate how to do that
-        System.out.println("In DBScan expandcluster");
         cluster.addPoint(p);
         states.put(p, State.CLUSTERED);
+        int temp = neighborPts.size();
 //        for(T point : neighborPts){
-        for(int i = 0; i < neighborPts.size(); i++){
+        for(int i = 0; i < temp; i++){
             T point = neighborPts.get(i);
             State s = states.get(point);
             if(s == State.UNVISITED){
-                System.out.println("In DBScan expandcluster: point is unvisited");
-                states.put(point, State.CLUSTERED);
+//                states.put(point, State.);
                 List<T> neighbors = this.regionQuery(point, points);
                 if(neighbors.size() >= minPts){
                     this.addAsSet(neighborPts, neighbors);
+                    temp = neighborPts.size();
                 }
             }
-            // Might not work,,,awk..
+
             List<T> clusterPoints = cluster.getPoints();
-            if(!clusterPoints.contains(point)){
+//            s = states.get(point);
+            if(s != State.CLUSTERED){
                 cluster.addPoint(point);
+                states.put(point,State.CLUSTERED);
             }
 
         }
@@ -213,11 +213,9 @@ public class DBScan<T extends Clusterable<T>> {
         //TODO: Query the region around point p to get its neighbors, that is all points within eps of p
         final List<T> neighbors = new ArrayList<T>();
 
-        System.out.println("In DBScan regionquery");
 
         for(T point : points){
             if(p.distance(point) <= eps){
-                System.out.println("In DBScan regionquery: point is added");
                 neighbors.add(point);
             }
         }

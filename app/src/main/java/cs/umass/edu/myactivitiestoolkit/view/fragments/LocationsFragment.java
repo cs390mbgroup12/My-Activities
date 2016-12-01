@@ -42,8 +42,10 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -369,10 +371,7 @@ public class LocationsFragment extends Fragment {
         final int[] colors = new int[]{Color.RED, Color.BLUE, Color.GREEN, Color.YELLOW, Color.CYAN, Color.WHITE};
         // TODO: For each cluster, draw a convex hull around the points in a sufficiently distinct color
         int count =0;
-        System.out.println("In LocationFragment: drawclusters");
-        System.out.println("In LocationFragment: drawclusters " + clusters.size());
         for(Cluster<GPSLocation> cluster: clusters) {
-            System.out.println("In LocationFragment: drawclusters: drawing hull :3");
             Object[] clusterPoints = cluster.getPoints().toArray();
             GPSLocation[] GPSPoints = new GPSLocation[clusterPoints.length];
             for(int i = 0; i < clusterPoints.length; i++){
@@ -398,7 +397,6 @@ public class LocationsFragment extends Fragment {
             lok.add(l);
         }
         List<Cluster<GPSLocation>> lokkie = scannie.cluster(lok);
-        System.out.println("In LocationFragment: runDBscan: after cluster");
         this.drawClusters((ArrayList<Cluster<GPSLocation>>)lokkie);
 
     }
@@ -434,19 +432,31 @@ public class LocationsFragment extends Fragment {
                         indexes[i] = Integer.parseInt(indexList[i].replace("\"", "").trim());
                     }
 
+                    Map<Integer,Cluster<GPSLocation>> hashie = new HashMap<Integer,Cluster<GPSLocation>>(k);
+                    for (int i = 0; i < k; i++) {
+                        Cluster<GPSLocation> clustie = new Cluster<GPSLocation>();
+                        hashie.put(i, clustie);
+
+                    }
 
                     for (int i = 0; i < indexes.length; i++) {
                         int index = indexes[i];
                         //TODO: Using the index of each location, generate a list of k clusters, then call drawClusters().
                         //You may choose to use the Map defined above or find a different way of doing it.
-
+                        Cluster<GPSLocation> clus = hashie.get(index);
+                        clus.addPoint(locations[i]);
+                        hashie.put(index,clus);
+                    }
+                    final List<Cluster<GPSLocation>> listie = new ArrayList<Cluster<GPSLocation>>();
+                    for (int i =0;i<k;i++){
+                        listie.add(hashie.get(i));
                     }
 
                     // We are only allowed to manipulate the map on the main (UI) thread:
                     getActivity().runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
-                            drawClusters(clusters.values());
+                            drawClusters(listie);
                         }
                     });
 
@@ -488,18 +498,41 @@ public class LocationsFragment extends Fragment {
                         indexes[i] = Integer.parseInt(indexList[i].replace("\"", "").trim());
                     }
 
+                    int k = 0;
+                    for(int i = 0; i < indexes.length; i++){
+                        if(indexes[i] > k){
+                            k = indexes[i];
+                        }
+                    }
+                    k = k+1;
+
+                    Map<Integer,Cluster<GPSLocation>> hashie = new HashMap<Integer,Cluster<GPSLocation>>(k);
+                    for (int i = 0; i < k; i++) {
+                        Cluster<GPSLocation> clustie = new Cluster<GPSLocation>();
+                        hashie.put(i, clustie);
+
+                    }
+
 
                     for (int i = 0; i < indexes.length; i++) {
                         int index = indexes[i];
                         //TODO: Using the index of each location, generate clusters, then call drawClusters().
                         //You may choose to use the Map defined above or find a different way of doing it.
+                        Cluster<GPSLocation> clus = hashie.get(index);
+                        clus.addPoint(locations[i]);
+                        hashie.put(index,clus);
+                    }
+
+                    final List<Cluster<GPSLocation>> listie = new ArrayList<Cluster<GPSLocation>>();
+                    for (int i =0;i<k;i++){
+                        listie.add(hashie.get(i));
                     }
 
                     // We are only allowed to manipulate the map on the main (UI) thread:
                     getActivity().runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
-                            drawClusters(clusters.values());
+                            drawClusters(listie);
                         }
                     });
 
